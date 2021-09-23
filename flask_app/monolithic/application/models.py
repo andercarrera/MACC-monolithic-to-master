@@ -59,3 +59,5 @@ class Piece(BaseModel):
     status = Column(String(256), default=STATUS_QUEUED)
     order_id = Column(Integer, ForeignKey('manufacturing_order.id'))
     order = relationship('Order', backref='piece')
+
+# intento de algo
