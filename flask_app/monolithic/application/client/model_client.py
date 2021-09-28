@@ -29,9 +29,10 @@ class BaseModel(Base):
 
 class Client(BaseModel):
     STATUS_CREATED = "Created"
+    STATUS_CANCELLED = "Cancelled"
 
     __tablename__ = "client"
     id = Column(Integer, primary_key=True)
     email = Column(TEXT, nullable=False, default="default@email.com")
-    # Bank account for payment. Order should have client's ID as fk?
+    # Bank account for payment
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
