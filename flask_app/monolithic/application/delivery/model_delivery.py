@@ -29,7 +29,7 @@ class BaseModel(Base):
 
 class Delivery(BaseModel):
     STATUS_PREPARING = "Preparing"
-    STATUS_READY = "Ready for delivery"
+    STATUS_READY = "Ready"
     STATUS_DELIVERED = "Delivered"
 
     __tablename__ = "delivery"
