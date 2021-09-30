@@ -6,6 +6,8 @@ from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 from .model_order import Order
 from .. import Session
 
+base_url = "http://localhost:13000/"
+
 
 # Order Routes #########################################################################################################
 @app.route('/order', methods=['POST'])
@@ -23,10 +25,15 @@ def create_order():
         )
         session.add(new_order)
         session.commit()
-        url = "http://localhost:13000/pieces"
-        datos = {"number_of_pieces": new_order.number_of_pieces,
-                 "order_id": new_order.id}
-        respuesta = requests.post(url, json=datos)
+
+        pieces_url = str(base_url + "pieces")
+        pieces_data = {"number_of_pieces": new_order.number_of_pieces,
+                       "order_id": new_order.id}
+        requests.post(pieces_url, json=pieces_data)
+
+        delivery_url = str(base_url + "delivery")
+        delivery_data = {"order_id": new_order.id}
+        requests.post(delivery_url, json=delivery_data)
     except KeyError:
         session.rollback()
         session.close()
