@@ -22,7 +22,6 @@ def add_pieces(new_order):
     requests.post(pieces_url, json=pieces_data)
 
 
-# Order Routes #########################################################################################################
 @app.route('/order_status', methods=['POST'])
 def changeOrderStatus():
     session = Session()
