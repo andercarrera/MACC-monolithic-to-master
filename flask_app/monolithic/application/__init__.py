@@ -23,11 +23,15 @@ def create_app():
         from .order import routes_order
         from .order import api_client_order
         from .order import model_order
+        from .client import model_client
+        from .client import api_client_client
+        from .client import routes_client
         from .delivery import model_delivery
         from .delivery import api_client_delivery
         from .delivery import routes_delivery
 
         model_machine.Base.metadata.create_all(engine)
         model_order.Base.metadata.create_all(engine)
+        model_client.Base.metadata.create_all(engine)
         model_delivery.Base.metadata.create_all(engine)
         return app
