@@ -17,7 +17,12 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
 
     with app.app_context():
-        from . import routes
-        from . import models
-        models.Base.metadata.create_all(engine)
+        from .machine import routes_machine
+        from .machine import api_client_machine
+        from .machine import model_machine
+        from .order import routes_order
+        from .order import api_client_order
+        from .order import model_order
+        model_machine.Base.metadata.create_all(engine)
+        model_order.Base.metadata.create_all(engine)
         return app

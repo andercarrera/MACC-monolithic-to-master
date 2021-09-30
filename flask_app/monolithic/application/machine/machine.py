@@ -1,10 +1,13 @@
 from random import randint
 from time import sleep
 from collections import deque
-from .models import Piece, Order
+
+import requests
+
+from .model_machine import Piece
 from threading import Thread, Lock, Event
 import sqlalchemy
-from . import Session
+from .. import Session
 
 
 class Machine(Thread):
@@ -64,7 +67,7 @@ class Machine(Thread):
         self.working_piece_to_manufacturing()
 
         # Simulate piece is being manufactured
-        sleep(randint(5, 20))
+        sleep(randint(5, 10))
 
         # Machine and piece status updated after manufacturing
         self.working_piece_to_finished()
@@ -80,16 +83,19 @@ class Machine(Thread):
     def working_piece_to_finished(self):
         self.instance.status = Machine.STATUS_CHANGING_PIECE
         self.working_piece.status = Piece.STATUS_MANUFACTURED
+        self.thread_session.commit()
+        self.thread_session.flush()
 
         order_finished = True
-        for piece in self.working_piece.order.pieces:
+        pieces = self.thread_session.query(Piece).filter_by(order_id=self.working_piece.order_id).all()
+        for piece in pieces:
             if piece.status != Piece.STATUS_MANUFACTURED:
                 order_finished = False
         if order_finished:
-            self.working_piece.order.status = Order.STATUS_FINISHED
-
-        self.thread_session.commit()
-        self.thread_session.flush()
+            url = "http://localhost:13000/order_status"
+            datos = {"order_status": "Finished",
+                     "order_id": piece.order_id}
+            respuesta = requests.post(url, json=datos)
 
     def add_pieces_to_queue(self, pieces):
         for piece in pieces:
@@ -106,6 +112,3 @@ class Machine(Thread):
             if piece.status == Piece.STATUS_QUEUED:
                 self.queue.remove(piece.ref)
                 piece.status = Piece.STATUS_CANCELLED
-
-
-
