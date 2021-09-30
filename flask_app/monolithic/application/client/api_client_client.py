@@ -6,7 +6,7 @@ from .model_client import Client
 from .. import Session
 
 @app.route('/clients', methods=['GET'])
-def view_orders():
+def view_clients():
     session = Session()
     print("GET All Clients.")
     clients = session.query(Client).all()
@@ -15,7 +15,7 @@ def view_orders():
     return response
 
 @app.route('/client/<int:client_id>', methods=['GET'])
-def view_order(client_id):
+def view_client(client_id):
     session = Session()
     client = session.query(Client).get(client_id)
     if not client:
