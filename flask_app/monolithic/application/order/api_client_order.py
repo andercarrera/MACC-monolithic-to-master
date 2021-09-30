@@ -6,7 +6,6 @@ from .model_order import Order
 from .. import Session
 
 
-# Order Routes #########################################################################################################
 @app.route('/order_status', methods=['POST'])
 def changeOrderStatus():
     session = Session()

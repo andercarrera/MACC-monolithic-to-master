@@ -23,6 +23,10 @@ def create_app():
         from .order import routes_order
         from .order import api_client_order
         from .order import model_order
+        from .payment import routes_payment
+        from .payment import api_client_payment
+        from .payment import model_payment
         model_machine.Base.metadata.create_all(engine)
         model_order.Base.metadata.create_all(engine)
+        model_payment.Base.metadata.create_all(engine)
         return app
