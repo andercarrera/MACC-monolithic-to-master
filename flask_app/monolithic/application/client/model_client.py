@@ -1,5 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, Integer, String, TEXT
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -34,5 +33,4 @@ class Client(BaseModel):
     __tablename__ = "client"
     id = Column(Integer, primary_key=True)
     email = Column(TEXT, nullable=False, default="default@email.com")
-    # Bank account for payment
     status = Column(String(256), nullable=False, default=STATUS_CREATED)

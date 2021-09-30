@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
 from .model_order import Order
 from .. import Session
+from ..order import api_client_order
 
 
 # Order Routes #########################################################################################################
@@ -23,10 +24,9 @@ def create_order():
         )
         session.add(new_order)
         session.commit()
-        url = "http://localhost:13000/pieces"
-        datos = {"number_of_pieces": new_order.number_of_pieces,
-                 "order_id": new_order.id}
-        respuesta = requests.post(url, json=datos)
+
+        api_client_order.add_pieces(new_order)
+        api_client_order.create_delivery(new_order)
     except KeyError:
         session.rollback()
         session.close()

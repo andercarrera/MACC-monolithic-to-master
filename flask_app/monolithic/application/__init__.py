@@ -26,7 +26,16 @@ def create_app():
         from .payment import routes_payment
         from .payment import api_client_payment
         from .payment import model_payment
+        from .client import model_client
+        from .client import api_client_client
+        from .client import routes_client
+        from .delivery import model_delivery
+        from .delivery import api_client_delivery
+        from .delivery import routes_delivery
+
         model_machine.Base.metadata.create_all(engine)
         model_order.Base.metadata.create_all(engine)
         model_payment.Base.metadata.create_all(engine)
+        model_client.Base.metadata.create_all(engine)
+        model_delivery.Base.metadata.create_all(engine)
         return app
