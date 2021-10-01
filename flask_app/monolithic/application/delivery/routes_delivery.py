@@ -59,7 +59,7 @@ def update_delivery_status(order_id):
     return response
 
 
-@app.route('/update-delivery-address/<int:order_id>', methods=['POST'])
+@app.route('/confirm-delivery/<int:order_id>', methods=['POST'])
 def update_delivery_address(order_id):
     content, session = init_req()
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
@@ -69,6 +69,8 @@ def update_delivery_address(order_id):
     try:
         new_address = content['address']
         delivery.address = new_address
+        session.commit()
+        delivery.status = "delivered"
         session.commit()
     except KeyError:
         session.rollback()
