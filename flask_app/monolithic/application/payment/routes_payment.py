@@ -46,10 +46,16 @@ def view_payments():
 
 
 def view_usr_payment(client_id):
-    session = Session()
-    payment = session.query(Payment).filter(Payment.client_id == client_id)
-    response = payment.payment_amount
-    session.close()
+    response = 0
+    try:
+        session = Session()
+        payment = session.query(Payment).filter_by(client_id=client_id).first()
+        if payment != None:
+            response = payment.payment_amount
+        session.close()
+    except KeyError:
+        print("No client id")
+
     return response
 
 
@@ -98,10 +104,9 @@ def pieces_id():
     if order_cost > usr_balance:
         order_accepted(order_id, False)
     else:
-        new_balance = usr_balance - order_cost
         url = "http://localhost:13000/payment"
         datos = {"description": "Order payment",
-                 "payment_amount": new_balance,
+                 "payment_amount": order_cost*(-1),
                  "client_id": client_id}
         response = requests.post(url, json=datos)
         order_accepted(order_id, True)

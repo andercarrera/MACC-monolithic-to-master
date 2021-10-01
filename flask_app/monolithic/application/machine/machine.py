@@ -9,9 +9,9 @@ from .. import Session
 
 
 class Machine(Thread):
-    STATUS_WAITING = "Waiting"
-    STATUS_CHANGING_PIECE = "Changing Piece"
-    STATUS_WORKING = "Working"
+    STATUS_WAITING = "waiting"
+    STATUS_CHANGING_PIECE = "changing Piece"
+    STATUS_WORKING = "working"
     __stauslock__ = Lock()
     thread_session = None
 

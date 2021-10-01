@@ -28,14 +28,15 @@ class BaseModel(Base):
 
 
 class Order(BaseModel):
-    STATUS_WAITING_FOR_PAYMENT = "Waiting for payment"
-    STATUS_CREATED = "Created"
-    STATUS_FINISHED = "Finished"
-    STATUS_CANCELLED = "Cancelled"
+    STATUS_WAITING_FOR_PAYMENT = "waiting"
+    STATUS_CREATED = "created"
+    STATUS_FINISHED = "finished"
+    STATUS_CANCELLED = "cancelled"
 
     __tablename__ = "manufacturing_order"
     id = Column(Integer, primary_key=True)
-    number_of_pieces = Column(Integer, default=0)
-    pieces_created = Column(Integer, nullable=False)
+    client_id = Column(Integer, nullable=False)
+    number_of_pieces = Column(Integer, nullable=False)
+    pieces_created = Column(Integer, default=0)
     description = Column(TEXT, nullable=False, default="No description")
-    status = Column(String(256), nullable=False, default="Created")
+    status = Column(String(256), nullable=False, default="created")
