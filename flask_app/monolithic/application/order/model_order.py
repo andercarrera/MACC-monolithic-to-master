@@ -35,6 +35,7 @@ class Order(BaseModel):
 
     __tablename__ = "manufacturing_order"
     id = Column(Integer, primary_key=True)
-    number_of_pieces = Column(Integer, nullable=False)
+    number_of_pieces = Column(Integer, default=0)
+    pieces_created = Column(Integer, nullable=False)
     description = Column(TEXT, nullable=False, default="No description")
     status = Column(String(256), nullable=False, default="Created")

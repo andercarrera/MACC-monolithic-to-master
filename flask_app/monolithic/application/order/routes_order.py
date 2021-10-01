@@ -20,18 +20,40 @@ def create_order():
         new_order = Order(
             description=content['description'],
             number_of_pieces=content['number_of_pieces'],
+            pieces_created=0,
             status=Order.STATUS_CREATED
         )
         session.add(new_order)
         session.commit()
 
-        api_client_order.add_pieces(new_order)
+        api_client_order.send_pieces(new_order)
         api_client_order.create_delivery(new_order)
     except KeyError:
         session.rollback()
         session.close()
         abort(BadRequest.code)
     response = jsonify(new_order.as_dict())
+    session.close()
+    return response
+
+
+@app.route('/piece_finished/<int:order_id>', methods=['POST'])
+def changeOrderStatus(order_id):
+    session = Session()
+    response = ""
+    try:
+        order = session.query(Order).get(order_id)
+        if order:
+            if order.pieces_created < order.number_of_pieces:
+                order.pieces_created += 1
+            if order.pieces_created == order.number_of_pieces:
+                order.status = order.STATUS_FINISHED
+            session.commit()
+            response = jsonify(order.as_dict())
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
     session.close()
     return response
 
@@ -67,9 +89,7 @@ def delete_order(order_id):
         session.close()
         abort(NotFound.code)
     print("DELETE Order {}.".format(order_id))
-    url = "http://localhost:13000/delete_pieces"
-    datos = {"order_id": order.id}
-    respuesta = requests.post(url, json=datos)
+    api_client_order.delete_order(order)
     session.delete(order)
     session.commit()
     response = jsonify(order.as_dict())

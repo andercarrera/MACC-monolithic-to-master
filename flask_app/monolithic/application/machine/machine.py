@@ -1,12 +1,10 @@
 from random import randint
 from time import sleep
 from collections import deque
-
-import requests
-
 from .model_machine import Piece
 from threading import Thread, Lock, Event
 import sqlalchemy
+from ..machine import api_client_machine
 from .. import Session
 
 
@@ -86,16 +84,7 @@ class Machine(Thread):
         self.thread_session.commit()
         self.thread_session.flush()
 
-        order_finished = True
-        pieces = self.thread_session.query(Piece).filter_by(order_id=self.working_piece.order_id).all()
-        for piece in pieces:
-            if piece.status != Piece.STATUS_MANUFACTURED:
-                order_finished = False
-        if order_finished:
-            url = "http://localhost:13000/order_status"
-            datos = {"order_status": "Finished",
-                     "order_id": piece.order_id}
-            respuesta = requests.post(url, json=datos)
+        api_client_machine.piece_finished(self.working_piece.order_id)
 
     def add_pieces_to_queue(self, pieces):
         for piece in pieces:
