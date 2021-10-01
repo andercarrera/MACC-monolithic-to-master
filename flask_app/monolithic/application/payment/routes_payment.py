@@ -18,9 +18,9 @@ def create_payment():
         new_payment = Payment(
             description=content['description'],
             payment_amount=content['payment_amount'],
-            usr_id=content['usr_id']
+            client_id=content['client_id']
         )
-        new_payment.payment_amount += delete_payment(new_payment.usr_id)
+        new_payment.payment_amount += delete_payment(new_payment.client_id)
         session.add(new_payment)
         session.commit()
     except KeyError:
@@ -42,25 +42,24 @@ def view_payments():
     return response
 
 
-def view_usr_payment(usr_id):
+def view_usr_payment(client_id):
     session = Session()
-    payment = session.query(Payment).filter(Payment.usr_id == usr_id)
+    payment = session.query(Payment).filter(Payment.client_id == client_id)
     response = payment.payment_amount
     session.close()
     return response
 
 
 # Deletes past payments, returns money amount
-def delete_payment(usr_id):
+def delete_payment(client_id):
     session = Session()
-    payment = session.query(Payment).filter(Payment.usr_id == usr_id)
+    payment = session.query(Payment).filter(Payment.client_id == client_id)
     if not payment:
         session.close()
         abort(NotFound.code)
     money = 0
     for p in payment:
-        print("DELETE Order {}.".format(p.id))
-        print("usr id: {} money: {}\n".format(p.usr_id, p.payment_amount))
+        print("Usr id: {} money: {}\n".format(p.client_id, p.payment_amount))
         money += p.payment_amount
         session.delete(p)
         session.commit()

@@ -31,5 +31,5 @@ class Payment(BaseModel):
     __tablename__ = "Performed Payments"
     id = Column(Integer, primary_key=True)
     payment_amount = Column(Integer, nullable=False)
-    usr_id = Column(Integer, nullable=False)
+    client_id = Column(Integer, nullable=False)
     description = Column(TEXT, nullable=False, default="No description")
