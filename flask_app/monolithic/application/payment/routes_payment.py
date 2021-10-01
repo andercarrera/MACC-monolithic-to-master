@@ -7,7 +7,6 @@ from .model_payment import Payment
 from .. import Session
 
 
-
 @app.route('/payment', methods=['POST'])
 def create_payment():
     session = Session()
@@ -32,6 +31,7 @@ def create_payment():
     session.close()
     return response
 
+
 @app.route('/payments', methods=['GET'])
 def view_payments():
     session = Session()
@@ -50,7 +50,7 @@ def view_usr_payment(usr_id):
     return response
 
 
-#Deletes past payments, returns money amount
+# Deletes past payments, returns money amount
 def delete_payment(usr_id):
     session = Session()
     payment = session.query(Payment).filter(Payment.usr_id == usr_id)
@@ -66,6 +66,7 @@ def delete_payment(usr_id):
         session.commit()
     session.close()
     return money
+
 
 @app.route('/neworder/<int:order_id>', methods=['POST'])
 def new_order(order_id):

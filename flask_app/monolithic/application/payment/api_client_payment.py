@@ -4,12 +4,11 @@ import requests
 
 piece_price = 10
 
-def hm_pieces(order_id):
 
-    #post preguntando piezas y user id
+def hm_pieces(order_id):
+    # post preguntando piezas y user id
     order_user_id = 0
     npieces = 0
-
 
     order_cost = npieces * piece_price
     usr_balance = routes_payment.view_usr_payment(order_user_id)
