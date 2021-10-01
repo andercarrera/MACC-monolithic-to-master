@@ -38,7 +38,7 @@ def create_order():
 
 
 @app.route('/piece_finished/<int:order_id>', methods=['POST'])
-def changeOrderStatus(order_id):
+def change_order_status(order_id):
     session = Session()
     response = ""
     try:

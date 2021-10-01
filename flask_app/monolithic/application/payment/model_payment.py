@@ -28,7 +28,7 @@ class BaseModel(Base):
 
 
 class Payment(BaseModel):
-    __tablename__ = "Performed Payments"
+    __tablename__ = "payment"
     id = Column(Integer, primary_key=True)
     payment_amount = Column(Integer, nullable=False)
     client_id = Column(Integer, nullable=False)

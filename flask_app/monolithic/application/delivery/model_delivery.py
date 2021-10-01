@@ -28,12 +28,12 @@ class BaseModel(Base):
 
 
 class Delivery(BaseModel):
-    STATUS_PREPARING = "Preparing"
-    STATUS_READY = "Ready"
-    STATUS_DELIVERED = "Delivered"
+    STATUS_PREPARING = "preparing"
+    STATUS_READY = "ready"
+    STATUS_DELIVERED = "delivered"
 
     __tablename__ = "delivery"
     id = Column(Integer, primary_key=True)
-    address = Column(TEXT, nullable=False, default="No address yet")
-    status = Column(String(256), nullable=False, default="Preparing")
+    address = Column(TEXT, nullable=True, default=None)
+    status = Column(String(256), nullable=False, default="preparing")
     order_id = Column(Integer, nullable=False)
