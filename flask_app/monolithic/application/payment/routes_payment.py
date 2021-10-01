@@ -1,10 +1,13 @@
+import requests
 from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
-from .api_client_payment import hm_pieces
+from .api_client_payment import hm_pieces, order_accepted
 from .model_payment import Payment
 from .. import Session
+
+piece_price = 10
 
 
 @app.route('/payment', methods=['POST'])
@@ -71,4 +74,36 @@ def delete_payment(client_id):
 def new_order(order_id):
     hm_pieces(order_id)
     response = jsonify("Order id recieved")
+    return response
+
+
+@app.route('/pieces_id', methods=['POST'])
+def pieces_id():
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    content = request.json
+    client_id = 0
+    number_of_pieces = 0
+    order_id = 0
+    try:
+        order_id = content['order_id']
+        client_id = content['client_id']
+        number_of_pieces = content['number_of_pieces']
+    except KeyError:
+        abort(BadRequest.code)
+
+    order_cost = number_of_pieces * piece_price
+    usr_balance = view_usr_payment(client_id)
+    response = jsonify("Order cancelled")
+    if order_cost > usr_balance:
+        order_accepted(order_id, False)
+    else:
+        new_balance = usr_balance - order_cost
+        url = "http://localhost:13000/payment"
+        datos = {"description": "Order payment",
+                 "payment_amount": new_balance,
+                 "client_id": client_id}
+        response = requests.post(url, json=datos)
+        order_accepted(order_id, True)
+
     return response
