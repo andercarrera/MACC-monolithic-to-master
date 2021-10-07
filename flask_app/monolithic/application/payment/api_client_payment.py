@@ -17,4 +17,4 @@ def order_accepted(order_id, payed):
     url = "http://localhost:13000/payment_status"
     datos = {"order_id": order_id,
              "payment_status": payment_status}
-    response = requests.post(url)
+    response = requests.post(url, json=datos)
