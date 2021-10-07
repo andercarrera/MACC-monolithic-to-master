@@ -1,4 +1,4 @@
-from application import create_app
+from flask_app.monolithic.application.delivery import create_app
 
 app = create_app()
 app.app_context().push()

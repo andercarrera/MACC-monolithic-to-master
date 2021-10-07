@@ -3,7 +3,7 @@ from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
 from .model_delivery import Delivery
-from .. import Session
+from . import Session
 
 my_delivery = Delivery()
 
