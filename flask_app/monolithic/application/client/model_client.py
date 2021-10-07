@@ -26,9 +26,10 @@ class BaseModel(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
 class Client(BaseModel):
-    STATUS_CREATED = "Created"
-    STATUS_CANCELLED = "Cancelled"
+    STATUS_CREATED = "created"
+    STATUS_CANCELLED = "cancelled"
 
     __tablename__ = "client"
     id = Column(Integer, primary_key=True)
