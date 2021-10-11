@@ -39,6 +39,7 @@ def create_order():
 
 @app.route('/payment_status', methods=['POST'])
 def change_payment_status():
+    status = ''
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
@@ -57,7 +58,9 @@ def change_payment_status():
         session.rollback()
         session.close()
         abort(BadRequest.code)
+    response = status
     session.close()
+    return response
 
 
 @app.route('/npieces/<int:order_id>', methods=['POST'])
@@ -66,6 +69,8 @@ def view_npieces(order_id):
     order = session.query(Order).get(order_id)
     api_client_order.send_number_of_pieces(order)
     session.close()
+
+    return 'OK'
 
 
 @app.route('/piece_finished/<int:order_id>', methods=['POST'])
@@ -121,7 +126,7 @@ def delete_order(order_id):
         session.close()
         abort(NotFound.code)
     print("DELETE Order {}.".format(order_id))
-    api_client_order.delete_order(order)
+    api_client_order.delete_pieces(order)
     session.delete(order)
     session.commit()
     response = jsonify(order.as_dict())

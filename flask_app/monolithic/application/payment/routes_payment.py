@@ -8,6 +8,25 @@ from .model_payment import Payment
 from . import Session
 
 piece_price = 10
+base_url_order = "http://localhost:13003/"
+base_url_payment = "http://localhost:13004/"
+
+
+# Deletes past payments, returns money amount
+def delete_payment(client_id):
+    session = Session()
+    payment = session.query(Payment).filter(Payment.client_id == client_id)
+    if not payment:
+        session.close()
+        abort(NotFound.code)
+    money = 0
+    for p in payment:
+        print("Usr id: {} money: {}\n".format(p.client_id, p.payment_amount))
+        money += p.payment_amount
+        session.delete(p)
+        session.commit()
+    session.close()
+    return money
 
 
 @app.route('/payment', methods=['POST'])
@@ -45,42 +64,24 @@ def view_payments():
     return response
 
 
-def view_usr_payment(client_id):
-    response = 0
+@app.route('/neworder/<int:order_id>', methods=['POST'])
+def new_order(order_id):
+    hm_pieces(order_id)
+    return 'OK'
+
+
+def check_usr_payment(client_id):
+    balance = 0
     try:
         session = Session()
         payment = session.query(Payment).filter_by(client_id=client_id).first()
-        if payment != None:
-            response = payment.payment_amount
+        if payment is not None:
+            balance = payment.payment_amount
         session.close()
     except KeyError:
         print("No client id")
 
-    return response
-
-
-# Deletes past payments, returns money amount
-def delete_payment(client_id):
-    session = Session()
-    payment = session.query(Payment).filter(Payment.client_id == client_id)
-    if not payment:
-        session.close()
-        abort(NotFound.code)
-    money = 0
-    for p in payment:
-        print("Usr id: {} money: {}\n".format(p.client_id, p.payment_amount))
-        money += p.payment_amount
-        session.delete(p)
-        session.commit()
-    session.close()
-    return money
-
-
-@app.route('/neworder/<int:order_id>', methods=['POST'])
-def new_order(order_id):
-    hm_pieces(order_id)
-    response = jsonify("Order id recieved")
-    return response
+    return balance
 
 
 @app.route('/pieces_id', methods=['POST'])
@@ -99,16 +100,17 @@ def pieces_id():
         abort(BadRequest.code)
 
     order_cost = number_of_pieces * piece_price
-    usr_balance = view_usr_payment(client_id)
-    response = jsonify("Order cancelled")
+    usr_balance = check_usr_payment(client_id)
     if order_cost > usr_balance:
+        response = 'Order cancelled'
         order_accepted(order_id, False)
     else:
-        url = "http://localhost:13000/payment"
+        url = "{}payment".format(base_url_payment)
         datos = {"description": "Order payment",
-                 "payment_amount": order_cost*(-1),
+                 "payment_amount": order_cost * (-1),
                  "client_id": client_id}
-        response = requests.post(url, json=datos)
+        requests.post(url, json=datos)
+        response = 'OK'
         order_accepted(order_id, True)
 
     return response
