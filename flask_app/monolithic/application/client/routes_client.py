@@ -2,8 +2,8 @@ from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import BadRequest, UnsupportedMediaType, NotFound
 
-from .model_client import Client
-from .. import Session
+from model_client import Client
+from . import Session
 
 
 # Client Routes #########################################################################################################
@@ -29,6 +29,7 @@ def create_client():
     session.close()
     return response
 
+
 @app.route('/clients', methods=['GET'])
 def view_clients():
     session = Session()
@@ -37,6 +38,7 @@ def view_clients():
     response = jsonify(Client.list_as_dict(clients))
     session.close()
     return response
+
 
 @app.route('/client/<int:client_id>', methods=['GET'])
 def view_client(client_id):

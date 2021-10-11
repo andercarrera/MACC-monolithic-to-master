@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
 from .api_client_payment import hm_pieces, order_accepted
 from .model_payment import Payment
-from .. import Session
+from . import Session
 
 piece_price = 10
 

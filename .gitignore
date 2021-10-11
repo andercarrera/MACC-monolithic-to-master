@@ -151,3 +151,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+/flask_app/monolithic/application/client/monolithic.db
+/flask_app/monolithic/application/delivery/monolithic.db
+/flask_app/monolithic/application/payment/monolithic.db
