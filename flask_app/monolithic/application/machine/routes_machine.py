@@ -4,7 +4,7 @@ from .model_machine import Piece
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType
 import traceback
 from .machine import Machine
-from .. import Session
+from . import Session
 
 my_machine = Machine()
 

@@ -5,7 +5,7 @@ from .model_machine import Piece
 from threading import Thread, Lock, Event
 import sqlalchemy
 from ..machine import api_client_machine
-from .. import Session
+from . import Session
 
 
 class Machine(Thread):

@@ -3,7 +3,7 @@ from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
 from .model_order import Order
-from .. import Session
+from . import Session
 from ..order import api_client_order
 
 
