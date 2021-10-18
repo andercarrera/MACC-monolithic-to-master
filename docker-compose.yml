@@ -2,8 +2,8 @@ version: '3.1'
 services:
   client:
     build: ./flask_app/client
-    ports:
-      - '13000:${GUNICORN_PORT}'
+    expose:
+      - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/client:/app'
     environment:
@@ -16,8 +16,8 @@ services:
         ipv4_address: '${CLIENT_IP}'
   delivery:
     build: ./flask_app/delivery
-    ports:
-      - '13001:${GUNICORN_PORT}'
+    expose:
+      - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/delivery:/app'
     environment:
@@ -31,8 +31,8 @@ services:
 
   machine:
     build: ./flask_app/machine
-    ports:
-      - '13002:${GUNICORN_PORT}'
+    expose:
+      - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/machine:/app'
     environment:
@@ -45,8 +45,8 @@ services:
         ipv4_address: '${MACHINE_IP}'
   order:
     build: ./flask_app/order
-    ports:
-      - '13003:${GUNICORN_PORT}'
+    expose:
+      - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/order:/app'
     environment:
@@ -59,8 +59,8 @@ services:
         ipv4_address: '${ORDER_IP}'
   payment:
     build: ./flask_app/payment
-    ports:
-      - '13004:${GUNICORN_PORT}'
+    expose:
+      - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/payment:/app'
     environment:
@@ -76,6 +76,9 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+    networks:
+      lb7_network:
+        ipv4_address: '${RABBITMQ_IP}'
   #db:
     #image: mysql
     #restart: always
