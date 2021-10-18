@@ -7,9 +7,11 @@ from .model_payment import Payment
 from . import Session
 from .api_client_payment import hm_pieces, order_accepted
 
+from .config_payment import Config
+
+
 piece_price = 10
-base_url_order = "http://localhost:13003/"
-base_url_payment = "http://localhost:13004/"
+base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
 
 
 # Deletes past payments, returns money amount

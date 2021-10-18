@@ -12,6 +12,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
 
     ORDER_IP = environ.get("ORDER_IP")
+    PAYMENT_IP = environ.get("PAYMENT_IP")
 
     GUNICORN_PORT = environ.get("GUNICORN_PORT")
     # print(SQLALCHEMY_DATABASE_URI)
