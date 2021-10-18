@@ -79,7 +79,27 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${RABBITMQ_IP}'
-  #db:
+  haproxy:
+    build: ./haproxy
+    ports:
+      - '${HAPROXY_PORT}:${HAPROXY_PORT}'
+      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
+    expose:
+      - '${HAPROXY_PORT}'
+      - '${HAPROXY_STATS_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${HAPROXY_IP}'
+    environment:
+      - 'CLIENT_IP=${CLIENT_IP}'
+      - 'DELIVERY_IP=${DELIVERY_IP}'
+      - 'MACHINE_IP=${MACHINE_IP}'
+      - 'ORDER_IP=${ORDER_IP}'
+      - 'PAYMENT_IP=${PAYMENT_IP}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+    #db:
     #image: mysql
     #restart: always
     #ports:
