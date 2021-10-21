@@ -4,7 +4,7 @@ from .config_payment import Config
 base_url_order = "http://{}:{}/".format(Config.ORDER_IP, Config.GUNICORN_PORT)
 
 
-def hm_pieces(order_id):
+def how_many_pieces(order_id):
     url = "{}npieces/{}".format(base_url_order, order_id)
     requests.post(url, None)
 

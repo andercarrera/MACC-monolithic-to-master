@@ -3,12 +3,11 @@ from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
-from .model_payment import Payment
 from . import Session
-from .api_client_payment import hm_pieces, order_accepted
+from .api_client_payment import how_many_pieces, order_accepted
 
 from .config_payment import Config
-
+from .model_payment import Payment
 
 piece_price = 10
 base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
@@ -68,7 +67,7 @@ def view_payments():
 
 @app.route('/neworder/<int:order_id>', methods=['POST'])
 def new_order(order_id):
-    hm_pieces(order_id)
+    how_many_pieces(order_id)
     return 'OK'
 
 
