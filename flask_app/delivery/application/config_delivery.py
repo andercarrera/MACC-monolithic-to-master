@@ -10,3 +10,6 @@ class Config:
     # Database
     SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
+
+    CLIENT_IP = environ.get("CLIENT_IP")
+    GUNICORN_PORT = environ.get("GUNICORN_PORT")
