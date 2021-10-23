@@ -38,6 +38,7 @@ def view_piece(piece_ref):
     return response
 
 
+"""
 @app.route('/pieces', methods=['POST'])
 def create_piece():
     session = Session()
@@ -64,6 +65,7 @@ def create_piece():
     response = jsonify(piece.as_dict())
     session.close()
     return response
+"""
 
 
 @app.route('/delete_pieces', methods=['POST'])

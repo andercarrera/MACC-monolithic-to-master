@@ -3,7 +3,7 @@ import pika
 import threading
 import requests
 from .model_payment import Payment
-from . import Session, Config
+from . import Session, Config, publisher_payment
 
 base_url_order = "http://{}:{}/".format(Config.ORDER_IP, Config.GUNICORN_PORT)
 piece_price = 10
@@ -80,10 +80,9 @@ def order_accepted(order_id, payed):
     else:
         payment_status = "Denied"
 
-    url = "{}payment_status".format(base_url_order)
     datos = {"order_id": order_id,
              "payment_status": payment_status}
-    requests.post(url, json=datos)
+    publisher_payment.publish_msg("event_exchange", "payment.status", str(datos))
 
 
 def del_payment(client_id):

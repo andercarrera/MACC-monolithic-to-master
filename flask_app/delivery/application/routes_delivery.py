@@ -40,27 +40,9 @@ def create_delivery():
     return response
 
 
-@app.route('/update-delivery-status/<int:order_id>', methods=['POST'])
-def update_delivery_status(order_id):
-    content, session = init_req()
-    delivery = session.query(Delivery).filter_by(order_id=order_id).first()
-    if not delivery:
-        abort(NotFound.code)
-    try:
-        new_status = content['status']
-        delivery.status = new_status
-        session.commit()
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    response = jsonify(delivery.as_dict())
-    session.close()
-    return response
-
-
 @app.route('/confirm-delivery/<int:order_id>', methods=['POST'])
 def update_delivery_address(order_id):
+    print("\nA\n", flush=True)
     content, session = init_req()
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
     if not delivery:
