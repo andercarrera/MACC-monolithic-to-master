@@ -6,6 +6,7 @@ services:
       - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/client:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
     environment:
       GUNICORN_PORT: '${GUNICORN_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
@@ -17,6 +18,11 @@ services:
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
     networks:
       lb7_network:
         ipv4_address: '${CLIENT_IP}'
@@ -26,6 +32,7 @@ services:
       - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/delivery:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
     environment:
       GUNICORN_PORT: '${GUNICORN_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
@@ -37,16 +44,21 @@ services:
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
     networks:
       lb7_network:
         ipv4_address: '${DELIVERY_IP}'
-
   machine:
     build: ./flask_app/machine
     expose:
       - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/machine:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
     environment:
       GUNICORN_PORT: '${GUNICORN_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
@@ -58,6 +70,11 @@ services:
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
     networks:
       lb7_network:
         ipv4_address: '${MACHINE_IP}'
@@ -67,6 +84,7 @@ services:
       - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/order:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
     environment:
       GUNICORN_PORT: '${GUNICORN_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
@@ -78,6 +96,11 @@ services:
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
     networks:
       lb7_network:
         ipv4_address: '${ORDER_IP}'
@@ -87,6 +110,7 @@ services:
       - '${GUNICORN_PORT}'
     volumes:
       - './flask_app/payment:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
     environment:
       GUNICORN_PORT: '${GUNICORN_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
@@ -98,17 +122,37 @@ services:
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
     networks:
       lb7_network:
         ipv4_address: '${PAYMENT_IP}'
   rabbitmq:
-    image: rabbitmq:3.9-management
+    image: rabbitmq:3.8-management
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
+      RABBITMQ_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
+      RABBITMQ_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_MANAGEMENT_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
+      RABBITMQ_MANAGEMENT_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
+      RABBITMQ_MANAGEMENT_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
     ports:
-      - "15672:15672"
-      - "5672:5672"
+      - "15671:15671"
+      - "5671:5671"
+    expose:
+      - "15671"
+      - "5671"
     networks:
       lb7_network:
         ipv4_address: '${RABBITMQ_IP}'
+    volumes:
+      - './certs/rabbitmq:/cert_rabbitmq'
   haproxy:
     build: ./haproxy
     ports:
@@ -118,7 +162,7 @@ services:
       - '${HAPROXY_PORT}'
       - '${HAPROXY_STATS_PORT}'
     volumes:
-      - ./haproxy/cert.pem:/usr/local/etc/haproxy/cert.pem
+      - ./certs/haproxy/haproxy.pem:/usr/local/etc/haproxy/haproxy.pem
     networks:
       lb7_network:
         ipv4_address: '${HAPROXY_IP}'

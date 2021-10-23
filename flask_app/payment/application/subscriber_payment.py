@@ -1,15 +1,25 @@
-# !/usr/bin/env python
-import pika
+import ssl
 import threading
-import requests
-from .model_payment import Payment
+
+import pika
+
 from . import Session, Config, publisher_payment
+from .model_payment import Payment
 
 base_url_order = "http://{}:{}/".format(Config.ORDER_IP, Config.GUNICORN_PORT)
 piece_price = 10
 
+# solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
+ssl.match_hostname = lambda cert, hostname: True
+
 
 class ThreadedConsumer:
+    context = ssl.create_default_context(
+        cafile=Config.CA_CERTS)
+    context.load_cert_chain(Config.CERT_FILE,
+                            Config.KEY_FILE)
+    ssl_options = pika.SSLOptions(context, Config.RABBITMQ_IP)
+
     def __init__(self, exchange_name, routing_key, callback_func):
         self.exchange_name = exchange_name
         self.routing_key = routing_key
@@ -17,9 +27,11 @@ class ThreadedConsumer:
         self.rabbitMQConnection()
 
     def rabbitMQConnection(self):
-        credentials = pika.PlainCredentials(username='guest', password='guest')
+        credentials = pika.PlainCredentials(username='rabbitmq', password='rabbitmq')
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=Config.RABBITMQ_IP, port=5672, credentials=credentials))
+            pika.ConnectionParameters(
+                ssl_options=self.ssl_options,
+                host=Config.RABBITMQ_IP, port=5671, virtual_host='/', credentials=credentials))
         channel = connection.channel()
         channel.exchange_declare(exchange=self.exchange_name, exchange_type='topic')
 
@@ -98,4 +110,3 @@ def del_payment(client_id):
         session.commit()
     session.close()
     return money
-

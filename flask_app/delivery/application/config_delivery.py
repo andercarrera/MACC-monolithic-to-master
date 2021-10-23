@@ -12,6 +12,15 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
 
     CLIENT_IP = environ.get("CLIENT_IP")
-    RABBITMQ_IP = environ.get("RABBITMQ_IP")
-
     GUNICORN_PORT = environ.get("GUNICORN_PORT")
+
+    """ Set RabbitMQ env vars """
+
+    RABBITMQ_IP = environ.get("RABBITMQ_IP")
+    RABBITMQ_USER = environ.get("RABBITMQ_USER")
+    RABBITMQ_PASS = environ.get("RABBITMQ_PASS")
+
+    CA_CERTS = environ.get("RABBITMQ_CA_CERT")
+    KEY_FILE = environ.get("RABBITMQ_CLIENT_KEY")
+    CERT_FILE = environ.get("RABBITMQ_CLIENT_CERT")
+
