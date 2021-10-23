@@ -3,6 +3,8 @@ from time import sleep
 
 import jwt
 import requests
+from jwt import InvalidSignatureError
+from werkzeug.exceptions import Unauthorized, abort
 
 from . import Config
 
@@ -28,11 +30,15 @@ class RsaSingleton(object):
 
     @staticmethod
     def check_jwt(jwt_token):
-        payload = jwt.decode(str.encode(jwt_token), RsaSingleton.public_key, algorithms='RS256')
-        # comprobar tiempo de expiración           
-        if payload['exp'] < datetime.timestamp(datetime.utcnow()):
-            return False
-        # comprobar rol
-        if payload['role'] != 'admin':
-            return False
-        return True
+        try:
+            payload = jwt.decode(str.encode(jwt_token), RsaSingleton.public_key, algorithms='RS256')
+            # comprobar tiempo de expiración
+            if payload['exp'] < datetime.timestamp(datetime.utcnow()):
+                return False
+            # comprobar rol
+            if payload['role'] != 'admin':
+                return False
+            return True
+        except InvalidSignatureError:
+            abort(Unauthorized.code, "JWT signature verification failed")
+
