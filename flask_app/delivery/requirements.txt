@@ -19,3 +19,13 @@ requests==2.26.0
 #Pika
 token==1.2.0
 pika
+
+# PyJWT
+PyJWT
+
+# bcrypt
+bcrypt
+
+# crypto
+pycryptodome
+cryptography

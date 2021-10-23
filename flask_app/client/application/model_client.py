@@ -35,3 +35,6 @@ class Client(BaseModel):
     id = Column(Integer, primary_key=True)
     email = Column(TEXT, nullable=False, default="default@email.com")
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
+    username = Column(TEXT, nullable=False)
+    password = Column(TEXT, nullable=False)
+    role = Column(TEXT, nullable=False)

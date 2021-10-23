@@ -117,6 +117,8 @@ services:
     expose:
       - '${HAPROXY_PORT}'
       - '${HAPROXY_STATS_PORT}'
+    volumes:
+      - ./haproxy/cert.pem:/usr/local/etc/haproxy/cert.pem
     networks:
       lb7_network:
         ipv4_address: '${HAPROXY_IP}'
@@ -129,6 +131,7 @@ services:
       - 'HAPROXY_PORT=${HAPROXY_PORT}'
       - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
       - 'GUNICORN_PORT=${GUNICORN_PORT}'
+    restart: unless-stopped
     #db:
     #image: mysql
     #restart: always

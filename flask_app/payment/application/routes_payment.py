@@ -1,7 +1,11 @@
 import requests
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Forbidden
+
+from .api_client_payment import how_many_pieces, order_accepted
+from .auth import RsaSingleton
+
 from .config_payment import Config
 from .model_payment import Payment
 from . import Session
@@ -34,6 +38,9 @@ def create_payment():
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
     content = request.json
+
+    if not RsaSingleton.check_jwt(content['jwt']):
+        abort(Forbidden.code)
     try:
         new_payment = Payment(
             description=content['description'],

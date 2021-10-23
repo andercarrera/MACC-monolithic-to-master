@@ -1,8 +1,11 @@
 from application import create_app
 from application.subscriber_payment import ThreadedConsumer
+from application.auth import RsaSingleton
 
 app = create_app()
 
+# request jwt public key
+RsaSingleton.request_public_key()
 ThreadedConsumer('event_exchange', 'order.created', ThreadedConsumer.check_balance)
 
 app.app_context().push()
