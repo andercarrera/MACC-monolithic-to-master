@@ -2,7 +2,7 @@ from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
-from . import api_client_order
+from . import api_client_order, publisher_order
 from .model_order import Order
 
 # Order Routes #########################################################################################################
@@ -27,7 +27,10 @@ def create_order():
         session.add(new_order)
         session.commit()
 
-        api_client_order.check_balance(new_order.id)
+        datos = {"number_of_pieces": new_order.number_of_pieces,
+                 "client_id": new_order.client_id,
+                 "order_id": new_order.id}
+        publisher_order.publish_msg("event_exchange", "order.created", str(datos))
         api_client_order.create_delivery(new_order)
     except KeyError:
         session.rollback()
@@ -62,16 +65,6 @@ def change_payment_status():
     response = status
     session.close()
     return response
-
-
-@app.route('/npieces/<int:order_id>', methods=['POST'])
-def view_npieces(order_id):
-    session = Session()
-    order = session.query(Order).get(order_id)
-    api_client_order.send_number_of_pieces(order)
-    session.close()
-
-    return 'OK'
 
 
 @app.route('/piece_finished/<int:order_id>', methods=['POST'])

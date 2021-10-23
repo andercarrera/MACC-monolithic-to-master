@@ -14,6 +14,8 @@ class Config:
     DELIVERY_IP = environ.get("DELIVERY_IP")
     MACHINE_IP = environ.get("MACHINE_IP")
     PAYMENT_IP = environ.get("PAYMENT_IP")
+    RABBITMQ_IP = environ.get("RABBITMQ_IP")
 
     GUNICORN_PORT = environ.get("GUNICORN_PORT")
+    RABBITMQ_PORT = environ.get("RABBITMQ_PORT")
     # print(SQLALCHEMY_DATABASE_URI)

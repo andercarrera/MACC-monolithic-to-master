@@ -2,12 +2,9 @@ import requests
 from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
-
-from . import Session
-from .api_client_payment import how_many_pieces, order_accepted
-
 from .config_payment import Config
 from .model_payment import Payment
+from . import Session
 
 piece_price = 10
 base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
@@ -62,56 +59,4 @@ def view_payments():
     payments = session.query(Payment).all()
     response = jsonify(Payment.list_as_dict(payments))
     session.close()
-    return response
-
-
-@app.route('/neworder/<int:order_id>', methods=['POST'])
-def new_order(order_id):
-    how_many_pieces(order_id)
-    return 'OK'
-
-
-def check_usr_payment(client_id):
-    balance = 0
-    try:
-        session = Session()
-        payment = session.query(Payment).filter_by(client_id=client_id).first()
-        if payment is not None:
-            balance = payment.payment_amount
-        session.close()
-    except KeyError:
-        print("No client id")
-
-    return balance
-
-
-@app.route('/pieces_id', methods=['POST'])
-def pieces_id():
-    if request.headers['Content-Type'] != 'application/json':
-        abort(UnsupportedMediaType.code)
-    content = request.json
-    client_id = 0
-    number_of_pieces = 0
-    order_id = 0
-    try:
-        order_id = content['order_id']
-        client_id = content['client_id']
-        number_of_pieces = content['number_of_pieces']
-    except KeyError:
-        abort(BadRequest.code)
-
-    order_cost = number_of_pieces * piece_price
-    usr_balance = check_usr_payment(client_id)
-    if order_cost > usr_balance:
-        response = 'Order cancelled'
-        order_accepted(order_id, False)
-    else:
-        url = "{}payment".format(base_url_payment)
-        datos = {"description": "Order payment",
-                 "payment_amount": order_cost * (-1),
-                 "client_id": client_id}
-        requests.post(url, json=datos)
-        response = 'OK'
-        order_accepted(order_id, True)
-
     return response

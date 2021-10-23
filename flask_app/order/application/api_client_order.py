@@ -19,19 +19,6 @@ def create_delivery(new_order):
     requests.post(delivery_url, json=delivery_data)
 
 
-def check_balance(order_id):
-    balance_url = str(base_url_payment + "neworder/{}".format(order_id))
-    requests.post(balance_url, None)
-
-
-def send_number_of_pieces(order):
-    nop_url = str(base_url_payment + "pieces_id")
-    nop_data = {"order_id": order.id,
-                "client_id": order.client_id,
-                "number_of_pieces": order.number_of_pieces}
-    requests.post(nop_url, json=nop_data)
-
-
 def update_delivery_status(order_id, status):
     status_url = str(base_url_delivery + "update-delivery-status/{}".format(order_id))
     status_data = {"status": status}
