@@ -3,7 +3,6 @@ from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Forbidden
 
-from .api_client_payment import how_many_pieces, order_accepted
 from .auth import RsaSingleton
 
 from .config_payment import Config
