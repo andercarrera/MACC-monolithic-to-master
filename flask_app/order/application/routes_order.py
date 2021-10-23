@@ -1,12 +1,12 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
-
-from . import api_client_order
-from .model_order import Order
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Forbidden
 
 # Order Routes #########################################################################################################
 from . import Session
+from . import api_client_order
+from .auth import RsaSingleton
+from .model_order import Order
 
 
 @app.route('/order', methods=['POST'])
@@ -17,6 +17,8 @@ def create_order():
         abort(UnsupportedMediaType.code)
     content = request.json
     try:
+        if not RsaSingleton.check_jwt(content['jwt']):
+            abort(Forbidden.code)
         new_order = Order(
             description=content['description'],
             client_id=content['client_id'],
@@ -27,8 +29,8 @@ def create_order():
         session.add(new_order)
         session.commit()
 
-        api_client_order.check_balance(new_order.id)
-        api_client_order.create_delivery(new_order)
+        # api_client_order.check_balance(new_order.id)
+        # api_client_order.create_delivery(new_order)
     except KeyError:
         session.rollback()
         session.close()

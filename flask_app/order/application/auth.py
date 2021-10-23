@@ -33,6 +33,6 @@ class RsaSingleton(object):
         if payload['exp'] < datetime.timestamp(datetime.utcnow()):
             return False
         # comprobar rol
-        if payload['role'] != 'ADMIN':
+        if payload['role'] != 'admin':
             return False
         return True

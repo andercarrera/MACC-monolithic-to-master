@@ -1,8 +1,9 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Forbidden
 
 from . import Session
+from .auth import RsaSingleton
 from .model_delivery import Delivery
 
 my_delivery = Delivery()
@@ -44,7 +45,6 @@ def update_delivery_status(order_id):
     content, session = init_req()
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
     if not delivery:
-        session.close()
         abort(NotFound.code)
     try:
         new_status = content['status']
@@ -64,8 +64,9 @@ def update_delivery_address(order_id):
     content, session = init_req()
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
     if not delivery:
-        session.close()
         abort(NotFound.code)
+    if not RsaSingleton.check_jwt(content['jwt']):
+        abort(Forbidden.code)
     try:
         new_address = content['address']
         delivery.address = new_address
