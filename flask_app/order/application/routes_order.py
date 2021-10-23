@@ -36,38 +36,11 @@ def create_order():
                  "client_id": new_order.client_id,
                  "order_id": new_order.id}
         publisher_order.publish_msg("event_exchange", "order.created", str(datos))
-        api_client_order.create_delivery(new_order)
     except KeyError:
         session.rollback()
         session.close()
         abort(BadRequest.code)
     response = jsonify(new_order.as_dict())
-    session.close()
-    return response
-
-
-@app.route('/payment_status', methods=['POST'])
-def change_payment_status():
-    status = ''
-    session = Session()
-    if request.headers['Content-Type'] != 'application/json':
-        abort(UnsupportedMediaType.code)
-    content = request.json
-    try:
-        order_id = content['order_id']
-        status = content['payment_status']
-        order = session.query(Order).get(order_id)
-        if status == "Accepted":
-            order.status = order.STATUS_CREATED
-            api_client_order.send_pieces(order)
-        elif status == "Denied":
-            order.status = order.STATUS_CANCELLED
-        session.commit()
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    response = status
     session.close()
     return response
 
@@ -83,7 +56,7 @@ def change_order_status(order_id):
                 order.pieces_created += 1
             if order.pieces_created == order.number_of_pieces:
                 order.status = order.STATUS_FINISHED
-                api_client_order.update_delivery_status(order.id, "ready")
+                publisher_order.publish_msg("event_exchange", "order.finished", str(order_id))
             session.commit()
             response = jsonify(order.as_dict())
     except KeyError:

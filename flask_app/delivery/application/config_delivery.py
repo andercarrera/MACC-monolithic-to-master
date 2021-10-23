@@ -12,4 +12,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
 
     CLIENT_IP = environ.get("CLIENT_IP")
+    RABBITMQ_IP = environ.get("RABBITMQ_IP")
+
     GUNICORN_PORT = environ.get("GUNICORN_PORT")
