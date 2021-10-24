@@ -86,7 +86,6 @@ class ThreadedConsumer:
 
 
 def order_accepted(order_id, payed):
-    print("Hola")
     if payed:
         payment_status = "Accepted"
     else:

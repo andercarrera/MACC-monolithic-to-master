@@ -71,7 +71,6 @@ def change_order_status(order_id):
 @app.route('/orders', methods=['GET'])
 def view_orders():
     session = Session()
-    print("GET All Orders.")
     orders = session.query(Order).all()
     response = jsonify(Order.list_as_dict(orders))
     session.close()

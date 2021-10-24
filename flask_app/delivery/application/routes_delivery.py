@@ -40,12 +40,11 @@ def create_delivery():
     return response
 
 
-@app.route('/confirm-delivery/<int:order_id>', methods=['POST'])
+@app.route('/delivery/confirm/<int:order_id>', methods=['POST'])
 def update_delivery_address(order_id):
-    print("\nA\n", flush=True)
     content, session = init_req()
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
-    if not delivery:
+    if delivery is None:
         abort(NotFound.code)
     if not RsaSingleton.check_jwt(content['jwt']):
         abort(Forbidden.code)

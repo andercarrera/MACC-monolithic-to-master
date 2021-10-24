@@ -61,7 +61,6 @@ def create_payment():
 @app.route('/payments', methods=['GET'])
 def view_payments():
     session = Session()
-    print("GET All Payments.")
     payments = session.query(Payment).all()
     response = jsonify(Payment.list_as_dict(payments))
     session.close()
