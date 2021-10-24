@@ -61,3 +61,23 @@ def update_delivery_address(order_id):
     response = jsonify(delivery.as_dict())
     session.close()
     return response
+
+
+@app.route('/delivery', methods=['GET'])
+def view_deliveries():
+    session = Session()
+    deliveries = session.query(Delivery).all()
+    response = jsonify(Delivery.list_as_dict(deliveries))
+    session.close()
+    return response
+
+
+@app.route('/delivery/<int:delivery_id>', methods=['GET'])
+def view_delivery(delivery_id):
+    session = Session()
+    delivery = session.query(Delivery).get(delivery_id)
+    if not delivery:
+        abort(NotFound.code, "Given delivery id not found in the Database")
+    response = jsonify(delivery.as_dict())
+    session.close()
+    return response

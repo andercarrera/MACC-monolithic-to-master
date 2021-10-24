@@ -16,8 +16,7 @@ def delete_payment(client_id):
     session = Session()
     payment = session.query(Payment).filter(Payment.client_id == client_id)
     if not payment:
-        session.close()
-        abort(NotFound.code)
+        abort(NotFound.code, "No payment entity found with the given client id")
     money = 0
     for p in payment:
         print("Usr id: {} money: {}\n".format(p.client_id, p.payment_amount))

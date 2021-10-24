@@ -1,13 +1,15 @@
-from flask import request, jsonify, abort
+import traceback
+
 from flask import current_app as app
+from flask import request, jsonify, abort
+from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType
 
 from . import Session
-from .model_machine import Piece
-from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType
-import traceback
 from .machine import Machine
+from .model_machine import Piece
 
 my_machine = Machine()
+
 
 # Piece Routes #########################################################################################################
 
@@ -30,9 +32,7 @@ def view_piece(piece_ref):
     session = Session()
     piece = session.query(Piece).get(piece_ref)
     if not piece:
-        session.close()
-        abort(NotFound.code)
-    print(piece)
+        abort(NotFound.code, "Given piece id not found in the database")
     response = jsonify(piece.as_dict())
     session.close()
     return response
@@ -122,6 +122,4 @@ def server_error_handler(e):
 
 def get_jsonified_error(e):
     traceback.print_tb(e.__traceback__)
-    return jsonify({"error_code":e.code, "error_message": e.description}), e.code
-
-
+    return jsonify({"error_code": e.code, "error_message": e.description}), e.code

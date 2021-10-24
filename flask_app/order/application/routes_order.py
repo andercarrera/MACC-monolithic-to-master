@@ -80,8 +80,7 @@ def view_order(order_id):
     session = Session()
     order = session.query(Order).get(order_id)
     if not order:
-        abort(NotFound.code)
-    print("GET Order {}: {}".format(order_id, order))
+        abort(NotFound.code, "Given order id not found in the Database")
     response = jsonify(order.as_dict())
     session.close()
     return response

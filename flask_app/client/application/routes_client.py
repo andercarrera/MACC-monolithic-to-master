@@ -5,6 +5,7 @@ import bcrypt
 import jwt
 from flask import current_app as app
 from flask import request, jsonify, abort
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType
 
 from . import Session
@@ -43,8 +44,6 @@ def create_client():
 @app.route('/client/create_jwt', methods=['GET'])
 def create_jwt():
     session = Session()
-    print(request.headers)
-    print(request.json)
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
     content = request.json
@@ -63,6 +62,9 @@ def create_jwt():
         response = {
             'jwt': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256')
         }
+
+    except NoResultFound:
+        abort(NotFound.code, "Given user id not found in the Database")
     except Exception as e:
         print(e, flush=True)
         session.rollback()
@@ -82,7 +84,6 @@ def get_public_key():
 @app.route('/clients', methods=['GET'])
 def view_clients():
     session = Session()
-    print("GET All Clients.")
     clients = session.query(Client).all()
     response = jsonify(Client.list_as_dict(clients))
     session.close()
@@ -94,8 +95,7 @@ def view_client(client_id):
     session = Session()
     client = session.query(Client).get(client_id)
     if not client:
-        abort(NotFound.code)
-    print("GET Client {}: {}".format(client_id, client))
+        abort(NotFound.code, "Given user id not found in the Database")
     response = jsonify(client.as_dict())
     session.close()
     return response
