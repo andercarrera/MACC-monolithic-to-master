@@ -43,11 +43,14 @@ def create_delivery():
 @app.route('/delivery/confirm/<int:order_id>', methods=['POST'])
 def update_delivery_address(order_id):
     content, session = init_req()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt(jwt)
+
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
     if delivery is None:
         abort(NotFound.code)
 
-    RsaSingleton.check_jwt(content['jwt'])
     try:
         new_address = content['address']
         delivery.address = new_address
@@ -61,6 +64,12 @@ def update_delivery_address(order_id):
     response = jsonify(delivery.as_dict())
     session.close()
     return response
+
+
+def get_jwt_from_request():
+    auth = request.headers.get('Authorization')
+    jwt = auth.split(" ")[1]
+    return jwt
 
 
 @app.route('/delivery', methods=['GET'])

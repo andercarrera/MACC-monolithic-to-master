@@ -18,7 +18,9 @@ def create_order():
         abort(UnsupportedMediaType.code)
     content = request.json
 
-    RsaSingleton.check_jwt(content['jwt'])
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt(jwt)
+
     try:
         new_order = Order(
             description=content['description'],
@@ -41,6 +43,12 @@ def create_order():
     response = jsonify(new_order.as_dict())
     session.close()
     return response
+
+
+def get_jwt_from_request():
+    auth = request.headers.get('Authorization')
+    jwt = auth.split(" ")[1]
+    return jwt
 
 
 @app.route('/piece_finished/<int:order_id>', methods=['POST'])
