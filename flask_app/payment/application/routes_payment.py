@@ -1,13 +1,11 @@
-import requests
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Forbidden
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
+from . import Session
 from .auth import RsaSingleton
-
 from .config_payment import Config
 from .model_payment import Payment
-from . import Session
 
 piece_price = 10
 base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
@@ -38,8 +36,7 @@ def create_payment():
         abort(UnsupportedMediaType.code)
     content = request.json
 
-    if not RsaSingleton.check_jwt(content['jwt']):
-        abort(Forbidden.code)
+    RsaSingleton.check_jwt(content['jwt'])
     try:
         new_payment = Payment(
             description=content['description'],

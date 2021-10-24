@@ -4,7 +4,7 @@ from time import sleep
 import jwt
 import requests
 from jwt import InvalidSignatureError
-from werkzeug.exceptions import Unauthorized, abort
+from werkzeug.exceptions import Unauthorized, abort, Forbidden
 
 from . import Config
 
@@ -34,11 +34,10 @@ class RsaSingleton(object):
             payload = jwt.decode(str.encode(jwt_token), RsaSingleton.public_key, algorithms='RS256')
             # comprobar tiempo de expiración
             if payload['exp'] < datetime.timestamp(datetime.utcnow()):
-                return False
+                abort(Forbidden.code, "JWT Token expired")
             # comprobar rol
             if payload['role'] != 'admin':
-                return False
-            return True
+                abort(Forbidden.code, "Resource only allowed to 'admin' users")
         except InvalidSignatureError:
             abort(Unauthorized.code, "JWT signature verification failed")
 

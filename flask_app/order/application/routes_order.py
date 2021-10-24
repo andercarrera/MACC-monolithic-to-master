@@ -1,13 +1,11 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Forbidden
-
-from . import api_client_order, publisher_order
-from .model_order import Order
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
 
 # Order Routes #########################################################################################################
 from . import Session
 from . import api_client_order
+from . import publisher_order
 from .auth import RsaSingleton
 from .model_order import Order
 
@@ -19,9 +17,9 @@ def create_order():
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
     content = request.json
+
+    RsaSingleton.check_jwt(content['jwt'])
     try:
-        if not RsaSingleton.check_jwt(content['jwt']):
-            abort(Forbidden.code)
         new_order = Order(
             description=content['description'],
             client_id=content['client_id'],
