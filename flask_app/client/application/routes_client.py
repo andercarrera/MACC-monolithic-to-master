@@ -6,7 +6,7 @@ import jwt
 from flask import current_app as app
 from flask import request, jsonify, abort
 from sqlalchemy.orm.exc import NoResultFound
-from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
 from .model_client import Client
@@ -75,7 +75,7 @@ def create_jwt():
     return response
 
 
-@app.route('/client/get_public_key', methods=['GET'])
+@app.route('/auth/get_public_key', methods=['GET'])
 def get_public_key():
     content = {'public_key': RsaSingleton.get_public_key().decode()}
     return content
@@ -84,6 +84,10 @@ def get_public_key():
 @app.route('/clients', methods=['GET'])
 def view_clients():
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     clients = session.query(Client).all()
     response = jsonify(Client.list_as_dict(clients))
     session.close()
@@ -93,12 +97,24 @@ def view_clients():
 @app.route('/client/<int:client_id>', methods=['GET'])
 def view_client(client_id):
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     client = session.query(Client).get(client_id)
     if not client:
         abort(NotFound.code, "Given user id not found in the Database")
     response = jsonify(client.as_dict())
     session.close()
     return response
+
+
+def get_jwt_from_request():
+    auth = request.headers.get('Authorization')
+    if auth is None:
+        abort(Unauthorized.code, "No JWT authorization in the request")
+    jwt_token = auth.split(" ")[1]
+    return jwt_token
 
 
 # Error Handling #######################################################################################################

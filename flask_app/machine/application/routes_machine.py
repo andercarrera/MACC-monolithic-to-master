@@ -2,13 +2,22 @@ import traceback
 
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
+from .auth import RsaSingleton
 from .machine import Machine
 from .model_machine import Piece
 
 my_machine = Machine()
+
+
+def get_jwt_from_request():
+    auth = request.headers.get('Authorization')
+    if auth is None:
+        abort(Unauthorized.code, "No JWT authorization in the request")
+    jwt = auth.split(" ")[1]
+    return jwt
 
 
 # Piece Routes #########################################################################################################
@@ -17,6 +26,10 @@ my_machine = Machine()
 @app.route('/pieces', methods=['GET'])
 def view_pieces():
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     order_id = request.args.get('order_id')
     if order_id:
         pieces = session.query(Piece).filter_by(order_id=order_id).all()
@@ -30,42 +43,16 @@ def view_pieces():
 @app.route('/piece/<int:piece_ref>', methods=['GET'])
 def view_piece(piece_ref):
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     piece = session.query(Piece).get(piece_ref)
     if not piece:
         abort(NotFound.code, "Given piece id not found in the database")
     response = jsonify(piece.as_dict())
     session.close()
     return response
-
-
-"""
-@app.route('/pieces', methods=['POST'])
-def create_piece():
-    session = Session()
-    if request.headers['Content-Type'] != 'application/json':
-        abort(UnsupportedMediaType.code)
-    content = request.json
-    piece = None
-    pieces = []
-    try:
-        number_of_pieces = content['number_of_pieces']
-        order_id = content['order_id']
-        for i in range(number_of_pieces):
-            piece = Piece()
-            piece.order_id = order_id
-            pieces.append(piece)
-            session.add(piece)
-        session.commit()
-        my_machine.add_pieces_to_queue(pieces)
-        session.commit()
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    response = jsonify(piece.as_dict())
-    session.close()
-    return response
-"""
 
 
 @app.route('/delete_pieces', methods=['POST'])

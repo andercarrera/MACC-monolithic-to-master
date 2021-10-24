@@ -22,14 +22,14 @@ class RsaSingleton(object):
     def request_public_key():
         while RsaSingleton.public_key is None:
             try:
-                response = requests.get(str(base_url_client + 'client/get_public_key'), verify=False).json()
+                response = requests.get(str(base_url_client + 'auth/get_public_key'), verify=False).json()
                 RsaSingleton.public_key = response['public_key']
             except:
                 print('Order waiting for public key', flush=True)
                 sleep(3)
 
     @staticmethod
-    def check_jwt(jwt_token):
+    def check_jwt_admin(jwt_token):
         try:
             payload = jwt.decode(str.encode(jwt_token), RsaSingleton.public_key, algorithms='RS256')
             # comprobar tiempo de expiración
@@ -41,3 +41,12 @@ class RsaSingleton(object):
         except InvalidSignatureError:
             abort(Unauthorized.code, "JWT signature verification failed")
 
+    @staticmethod
+    def check_jwt_any_role(jwt_token):
+        try:
+            payload = jwt.decode(str.encode(jwt_token), RsaSingleton.public_key, algorithms='RS256')
+            # comprobar tiempo de expiración
+            if payload['exp'] < datetime.timestamp(datetime.utcnow()):
+                abort(Forbidden.code, "JWT Token expired")
+        except InvalidSignatureError:
+            abort(Unauthorized.code, "JWT signature verification failed")

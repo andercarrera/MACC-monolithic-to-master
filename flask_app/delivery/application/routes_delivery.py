@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
 from .auth import RsaSingleton
@@ -15,6 +15,9 @@ def init_req():
         abort(UnsupportedMediaType.code)
     content = request.json
     return content, session
+
+
+# TODO: borrar este endpoint, usar como AMQP
 
 
 # Delivery Routes
@@ -44,8 +47,8 @@ def create_delivery():
 def update_delivery_address(order_id):
     content, session = init_req()
 
-    jwt = get_jwt_from_request()
-    RsaSingleton.check_jwt(jwt)
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt_token)
 
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
     if delivery is None:
@@ -68,6 +71,8 @@ def update_delivery_address(order_id):
 
 def get_jwt_from_request():
     auth = request.headers.get('Authorization')
+    if auth is None:
+        abort(Unauthorized.code, "No JWT authorization in the request")
     jwt = auth.split(" ")[1]
     return jwt
 
@@ -75,6 +80,10 @@ def get_jwt_from_request():
 @app.route('/delivery', methods=['GET'])
 def view_deliveries():
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     deliveries = session.query(Delivery).all()
     response = jsonify(Delivery.list_as_dict(deliveries))
     session.close()
@@ -84,6 +93,10 @@ def view_deliveries():
 @app.route('/delivery/<int:delivery_id>', methods=['GET'])
 def view_delivery(delivery_id):
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     delivery = session.query(Delivery).get(delivery_id)
     if not delivery:
         abort(NotFound.code, "Given delivery id not found in the Database")

@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
 # Order Routes #########################################################################################################
 from . import Session
@@ -19,7 +19,7 @@ def create_order():
     content = request.json
 
     jwt = get_jwt_from_request()
-    RsaSingleton.check_jwt(jwt)
+    RsaSingleton.check_jwt_admin(jwt)
 
     try:
         new_order = Order(
@@ -47,6 +47,8 @@ def create_order():
 
 def get_jwt_from_request():
     auth = request.headers.get('Authorization')
+    if auth is None:
+        abort(Unauthorized.code, "No JWT authorization in the request")
     jwt = auth.split(" ")[1]
     return jwt
 
@@ -77,6 +79,10 @@ def change_order_status(order_id):
 @app.route('/orders', methods=['GET'])
 def view_orders():
     session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt)
+
     orders = session.query(Order).all()
     response = jsonify(Order.list_as_dict(orders))
     session.close()
@@ -86,6 +92,10 @@ def view_orders():
 @app.route('/order/<int:order_id>', methods=['GET'])
 def view_order(order_id):
     session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt)
+
     order = session.query(Order).get(order_id)
     if not order:
         abort(NotFound.code, "Given order id not found in the Database")
@@ -97,11 +107,13 @@ def view_order(order_id):
 @app.route('/order/<int:order_id>', methods=['DELETE'])
 def delete_order(order_id):
     session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt)
+
     order = session.query(Order).get(order_id)
     if not order:
-        session.close()
-        abort(NotFound.code)
-    print("DELETE Order {}.".format(order_id))
+        abort(NotFound.code, "Order not found for given order id")
     api_client_order.delete_pieces(order)
     session.delete(order)
     session.commit()

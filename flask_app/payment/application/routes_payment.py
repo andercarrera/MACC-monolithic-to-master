@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
 from .auth import RsaSingleton
@@ -36,7 +36,7 @@ def create_payment():
     content = request.json
 
     jwt = get_jwt_from_request()
-    RsaSingleton.check_jwt(jwt)
+    RsaSingleton.check_jwt_admin(jwt)
 
     try:
         new_payment = Payment(
@@ -58,6 +58,8 @@ def create_payment():
 
 def get_jwt_from_request():
     auth = request.headers.get('Authorization')
+    if auth is None:
+        abort(Unauthorized.code, "No JWT authorization in the request")
     jwt = auth.split(" ")[1]
     return jwt
 
@@ -65,6 +67,10 @@ def get_jwt_from_request():
 @app.route('/payments', methods=['GET'])
 def view_payments():
     session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     payments = session.query(Payment).all()
     response = jsonify(Payment.list_as_dict(payments))
     session.close()
