@@ -136,8 +136,8 @@ def view_roles():
     jwt_token = get_jwt_from_request()
     RsaSingleton.check_jwt_any_role(jwt_token)
 
-    clients = session.query(Client).all()
-    response = jsonify(Client.list_as_dict(clients))
+    roles = session.query(Role).all()
+    response = jsonify(Role.list_as_dict(roles))
     session.close()
     return response
 
@@ -149,6 +149,10 @@ def creat_role():
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
     content = request.json
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt_token)
+
     try:
         new_role = Role(
             name=content['name']
@@ -164,7 +168,33 @@ def creat_role():
     return response
 
 
-@app.route('/role/<role_id>', methods=['DELETE'])
+@app.route('/client/role/<role_id>', methods=['PUT'])
+def update_role(role_id):
+    session = Session()
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    content = request.json
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt_token)
+
+    role = session.query(Role).get(role_id)
+    if not role:
+        abort(NotFound.code, "Given role id not found in the Database")
+
+    try:
+        role.name = content['name']
+        session.commit()
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
+    response = jsonify(role.as_dict())
+    session.close()
+    return response
+
+
+@app.route('/client/role/<role_id>', methods=['DELETE'])
 def delete_role(role_id):
     session = Session()
 
