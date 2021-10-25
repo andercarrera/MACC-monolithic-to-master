@@ -1,8 +1,6 @@
 import ssl
 import threading
-
 import pika
-
 from . import Session, Config, publisher_payment
 from .model_payment import Payment
 

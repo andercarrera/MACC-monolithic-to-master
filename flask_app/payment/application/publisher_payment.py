@@ -1,7 +1,5 @@
 import ssl
-
 import pika
-
 from . import Config
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match

@@ -1,9 +1,7 @@
 # !/usr/bin/env python
 import ssl
 import threading
-
 import pika
-
 from . import Config, Session, publisher_order
 from .model_order import Order
 
@@ -57,3 +55,14 @@ class ThreadedConsumer:
         elif status == "Denied":
             order.status = order.STATUS_CANCELLED
         session.commit()
+        session.close()
+
+    @staticmethod
+    def order_delivered(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+        order_id = int(body)
+        session = Session()
+        order = session.query(Order).get(order_id)
+        order.status = Order.STATUS_DELIVERED
+        session.commit()
+        Session.close()

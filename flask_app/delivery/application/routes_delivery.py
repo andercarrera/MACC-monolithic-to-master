@@ -3,6 +3,7 @@ from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
+from . import publisher_delivery
 from .auth import RsaSingleton
 from .model_delivery import Delivery
 
@@ -58,7 +59,8 @@ def update_delivery_address(order_id):
         new_address = content['address']
         delivery.address = new_address
         session.commit()
-        delivery.status = "delivered"
+        delivery.status = Delivery.STATUS_DELIVERED
+        publisher_delivery.publish_msg("event_exchange", "delivery.delivered", str(order_id))
         session.commit()
     except KeyError:
         session.rollback()

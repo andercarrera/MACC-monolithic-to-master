@@ -5,6 +5,7 @@ from application.auth import RsaSingleton
 app = create_app()
 
 ThreadedConsumer('event_exchange', 'payment.status', ThreadedConsumer.check_status)
+ThreadedConsumer('event_exchange', 'delivery.delivered', ThreadedConsumer.order_delivered)
 
 # request jwt public key
 RsaSingleton.request_public_key()

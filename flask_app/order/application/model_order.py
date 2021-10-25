@@ -31,6 +31,7 @@ class Order(BaseModel):
     STATUS_WAITING_FOR_PAYMENT = "waiting"
     STATUS_CREATED = "created"
     STATUS_FINISHED = "finished"
+    STATUS_DELIVERED = "delivered"
     STATUS_CANCELLED = "cancelled"
 
     __tablename__ = "manufacturing_order"
