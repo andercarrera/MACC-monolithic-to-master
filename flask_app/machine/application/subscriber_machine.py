@@ -58,3 +58,17 @@ class ThreadedConsumer:
         session.commit()
         my_machine.add_pieces_to_queue(pieces)
         session.commit()
+
+    @staticmethod
+    def delete_pieces(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body), flush=True)
+        order_id = int(body)
+        session = Session()
+        try:
+            pieces = session.query(Piece).filter_by(order_id=order_id).all()
+            my_machine.remove_pieces_from_queue(pieces)
+            session.commit()
+        except KeyError:
+            session.rollback()
+            session.close()
+        session.close()

@@ -8,9 +8,9 @@ from flask import request, jsonify, abort
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
 
-from . import Session
 from .model_client import Client, Role, client_role_table
 from .mycrypto import RsaSingleton
+from . import Session
 
 
 # Client Routes

@@ -3,7 +3,6 @@ from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
-from . import api_client_order
 from . import publisher_order
 from .auth import RsaSingleton
 from .model_order import Order
@@ -54,28 +53,6 @@ def get_jwt_from_request():
     return jwt
 
 
-@app.route('/piece_finished/<int:order_id>', methods=['POST'])
-def change_order_status(order_id):
-    session = Session()
-    response = ""
-    try:
-        order = session.query(Order).get(order_id)
-        if order:
-            if order.pieces_created < order.number_of_pieces:
-                order.pieces_created += 1
-            if order.pieces_created == order.number_of_pieces:
-                order.status = order.STATUS_FINISHED
-                publisher_order.publish_msg("event_exchange", "order.finished", str(order_id))
-            session.commit()
-            response = jsonify(order.as_dict())
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    session.close()
-    return response
-
-
 @app.route('/order', methods=['GET'])
 @app.route('/orders', methods=['GET'])
 def view_orders():
@@ -115,7 +92,7 @@ def delete_order(order_id):
     order = session.query(Order).get(order_id)
     if not order:
         abort(NotFound.code, "Order not found for given order id")
-    api_client_order.delete_pieces(order)
+    publisher_order.publish_msg("event_exchange", "order.deleted", str(order.id))
     session.delete(order)
     session.commit()
     response = jsonify(order.as_dict())
