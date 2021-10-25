@@ -38,7 +38,7 @@ def create_payment():
     content = request.json
 
     jwt = get_jwt_from_request()
-    RsaSingleton.check_jwt_admin(jwt)
+    RsaSingleton.check_jwt_any_role(jwt)
 
     try:
         new_payment = Payment(

@@ -37,7 +37,7 @@ class RsaSingleton(object):
             if payload['exp'] < datetime.timestamp(datetime.utcnow()):
                 abort(Forbidden.code, "JWT Token expired")
             # comprobar rol
-            if payload['role'] != 'admin':
+            if [payload['id'], 1] not in payload['roles']:
                 abort(Forbidden.code, "Resource only allowed to 'admin' users")
         except InvalidSignatureError:
             abort(Unauthorized.code, "JWT signature verification failed")

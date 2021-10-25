@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
-from .model_client import Client, Role
+from .model_client import Client, Role, client_role_table
 from .mycrypto import RsaSingleton
 
 
@@ -33,8 +33,11 @@ def create_client():
             username=content['username'],
             password=bcrypt.hashpw(content['password'].encode(), bcrypt.gensalt()).decode('utf-8'),
         )
-        roles = session.query(Role).filter_by(id=content['role_id']).all()
-        new_client.roles.append(roles)
+        role = session.query(Role).filter_by(id=content['role_id']).one()
+        if role is None:
+            abort(NotFound.code, "Given role_id not found")
+        else:
+            new_client.roles.append(role)
 
         session.add(new_client)
         session.commit()
@@ -55,14 +58,16 @@ def create_jwt():
     content = request.json
     response = None
     try:
+        roles = session.query(client_role_table).filter_by(client_id=content['id']).all()
         user = session.query(Client).filter(Client.id == content['id']).one()
+
         if not bcrypt.checkpw(content['password'].encode('utf-8'), user.password.encode('utf-8')):
             raise Exception
         payload = {
             'id': user.id,
             'username': user.username,
             'service': False,
-            'role': user.role,
+            'roles': roles,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }
         response = {
@@ -125,8 +130,21 @@ def get_jwt_from_request():
 
 # Role Routes
 # #########################################################################################################
+@app.route('/client/role', methods=['GET'])
+def view_roles():
+    session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
+    clients = session.query(Client).all()
+    response = jsonify(Client.list_as_dict(clients))
+    session.close()
+    return response
+
+
 @app.route('/client/role', methods=['POST'])
-def create_client():
+def creat_role():
     session = Session()
     new_role = None
     if request.headers['Content-Type'] != 'application/json':
@@ -147,8 +165,8 @@ def create_client():
     return response
 
 
-@app.route('/client/role/<role_id>', methods=['DELETE'])
-def delete_order(role_id):
+@app.route('/role/<role_id>', methods=['DELETE'])
+def delete_role(role_id):
     session = Session()
 
     jwt = get_jwt_from_request()

@@ -27,7 +27,7 @@ def update_delivery_address(order_id):
     content, session = init_req()
 
     jwt_token = get_jwt_from_request()
-    RsaSingleton.check_jwt_admin(jwt_token)
+    RsaSingleton.check_jwt_any_role(jwt_token)
 
     delivery = session.query(Delivery).filter_by(order_id=order_id).first()
     if delivery is None:
