@@ -1,6 +1,7 @@
-from sqlalchemy import Column, DateTime, Integer, String, TEXT
-from sqlalchemy.sql import func
+from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -27,6 +28,12 @@ class BaseModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
+client_role_table = Table('client_role', Base.metadata,
+                          Column('client_id', ForeignKey('client.id'), primary_key=True),
+                          Column('role_id', ForeignKey('role.id'), primary_key=True)
+                          )
+
+
 class Client(BaseModel):
     STATUS_CREATED = "created"
     STATUS_CANCELLED = "cancelled"
@@ -37,4 +44,11 @@ class Client(BaseModel):
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
     username = Column(TEXT, nullable=False)
     password = Column(TEXT, nullable=False)
-    role = Column(TEXT, nullable=False)
+    roles = relationship("Role", secondary=client_role_table, back_populates="clients")
+
+
+class Role(BaseModel):
+    __tablename__ = "role"
+    id = Column(Integer, primary_key=True)
+    name = Column(TEXT, nullable=False)
+    clients = relationship("Client", secondary=client_role_table, back_populates="roles")

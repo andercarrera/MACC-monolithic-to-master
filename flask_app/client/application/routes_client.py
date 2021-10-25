@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
 
 from . import Session
-from .model_client import Client
+from .model_client import Client, Role
 from .mycrypto import RsaSingleton
 
 
@@ -22,14 +22,20 @@ def create_client():
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
     content = request.json
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt_token)
+
     try:
         new_client = Client(
             email=content['email'],
             status=Client.STATUS_CREATED,
             username=content['username'],
             password=bcrypt.hashpw(content['password'].encode(), bcrypt.gensalt()).decode('utf-8'),
-            role=content['role']
         )
+        roles = session.query(Role).filter_by(id=content['role_id']).all()
+        new_client.roles.append(roles)
+
         session.add(new_client)
         session.commit()
     except KeyError:
@@ -115,6 +121,48 @@ def get_jwt_from_request():
         abort(Unauthorized.code, "No JWT authorization in the request")
     jwt_token = auth.split(" ")[1]
     return jwt_token
+
+
+# Role Routes
+# #########################################################################################################
+@app.route('/client/role', methods=['POST'])
+def create_client():
+    session = Session()
+    new_role = None
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    content = request.json
+    try:
+        new_role = Role(
+            name=content['name']
+        )
+        session.add(new_role)
+        session.commit()
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
+    response = jsonify(new_role.as_dict())
+    session.close()
+    return response
+
+
+@app.route('/client/role/<role_id>', methods=['DELETE'])
+def delete_order(role_id):
+    session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt)
+
+    role = session.query(Role).get(role_id)
+    if not role:
+        abort(NotFound.code, "Role not found for given order id")
+
+    session.delete(role)
+    session.commit()
+    response = jsonify(role.as_dict())
+    session.close()
+    return response
 
 
 # Error Handling #######################################################################################################
