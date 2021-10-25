@@ -55,13 +55,13 @@ def create_jwt():
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
         abort(UnsupportedMediaType.code)
-    content = request.json
+    auth = request.authorization
     response = None
     try:
-        roles = session.query(client_role_table).filter_by(client_id=content['id']).all()
-        user = session.query(Client).filter(Client.id == content['id']).one()
+        roles = session.query(client_role_table).filter_by(client_id=auth['username']).all()
+        user = session.query(Client).filter(Client.id == auth['username']).one()
 
-        if not bcrypt.checkpw(content['password'].encode('utf-8'), user.password.encode('utf-8')):
+        if not bcrypt.checkpw(auth['password'].encode('utf-8'), user.password.encode('utf-8')):
             raise Exception
         payload = {
             'id': user.id,
