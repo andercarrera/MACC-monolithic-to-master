@@ -22,7 +22,7 @@ class RsaSingleton(object):
     def request_public_key():
         while RsaSingleton.public_key is None:
             try:
-                response = requests.get(str(base_url_client + 'auth/get_public_key'), verify=False).json()
+                response = requests.get(str(base_url_client + 'client/get_public_key'), verify=False).json()
                 RsaSingleton.public_key = response['public_key']
             except:
                 print('Order waiting for public key', flush=True)

@@ -85,7 +85,7 @@ def create_jwt():
     return response
 
 
-@app.route('/auth/get_public_key', methods=['GET'])
+@app.route('/client/get_public_key', methods=['GET'])
 def get_public_key():
     content = {'public_key': RsaSingleton.get_public_key().decode()}
     return content
