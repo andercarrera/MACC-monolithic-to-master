@@ -1,11 +1,9 @@
 # !/usr/bin/env python
 import ssl
 import threading
-
 import pika
 from flask import abort
 from werkzeug.exceptions import NotFound, BadRequest
-
 from . import Config, Session
 from .model_delivery import Delivery
 

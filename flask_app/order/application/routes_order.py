@@ -2,12 +2,13 @@ from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
-# Order Routes #########################################################################################################
 from . import Session
 from . import api_client_order
 from . import publisher_order
 from .auth import RsaSingleton
 from .model_order import Order
+
+# Order Routes #########################################################################################################
 
 
 @app.route('/order', methods=['POST'])

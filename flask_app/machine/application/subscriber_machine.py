@@ -1,9 +1,7 @@
 # !/usr/bin/env python
 import ssl
 import threading
-
 import pika
-
 from . import Config, Session
 from .machine import Machine
 from .model_machine import Piece

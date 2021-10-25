@@ -2,7 +2,9 @@ from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
 
+# Delivery Routes ######################################################################################################
 from . import Session
+from . import publisher_delivery
 from .auth import RsaSingleton
 from .model_delivery import Delivery
 
@@ -17,30 +19,7 @@ def init_req():
     return content, session
 
 
-# TODO: borrar este endpoint, usar como AMQP
-
-
-# Delivery Routes
-# #########################################################################################################
-@app.route('/delivery', methods=['POST'])
-def create_delivery():
-    content, session = init_req()
-    new_delivery = None
-    try:
-        order_id = content['order_id']
-        new_delivery = Delivery(
-            order_id=order_id,
-            status=Delivery.STATUS_PREPARING
-        )
-        session.add(new_delivery)
-        session.commit()
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    response = jsonify(new_delivery.as_dict())
-    session.close()
-    return response
+# Delivery Routes ######################################################################################################
 
 
 @app.route('/delivery/confirm/<int:order_id>', methods=['POST'])
@@ -58,7 +37,8 @@ def update_delivery_address(order_id):
         new_address = content['address']
         delivery.address = new_address
         session.commit()
-        delivery.status = "delivered"
+        delivery.status = Delivery.STATUS_DELIVERED
+        publisher_delivery.publish_msg("event_exchange", "delivery.delivered", str(order_id))
         session.commit()
     except KeyError:
         session.rollback()
