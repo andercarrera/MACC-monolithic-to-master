@@ -10,6 +10,8 @@ from .model_payment import Payment
 piece_price = 10
 base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
 
+# Payment Routes #######################################################################################################
+
 
 # Deletes past payments, returns money amount
 def delete_payment(client_id):
