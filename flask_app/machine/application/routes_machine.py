@@ -56,26 +56,6 @@ def view_piece(piece_ref):
     return response
 
 
-@app.route('/delete_pieces', methods=['POST'])
-def delete_pieces():
-    session = Session()
-    if request.headers['Content-Type'] != 'application/json':
-        abort(UnsupportedMediaType.code)
-    content = request.json
-    try:
-        order_id = content['order_id']
-        pieces = session.query(Piece).filter_by(order_id=order_id).all()
-        my_machine.remove_pieces_from_queue(pieces)
-        session.commit()
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    response = "Piezas eliminadas"
-    session.close()
-    return response
-
-
 # Machine Routes #######################################################################################################
 @app.route('/machine/status', methods=['GET'])
 def view_machine_status():

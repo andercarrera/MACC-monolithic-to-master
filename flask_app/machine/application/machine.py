@@ -4,7 +4,8 @@ from collections import deque
 from .model_machine import Piece
 from threading import Thread, Lock, Event
 import sqlalchemy
-from . import Session, api_client_machine
+from . import publisher_machine
+from . import Session
 
 
 class Machine(Thread):
@@ -83,7 +84,7 @@ class Machine(Thread):
         self.thread_session.commit()
         self.thread_session.flush()
 
-        api_client_machine.piece_finished(self.working_piece.order_id)
+        publisher_machine.publish_msg("event_exchange", "machine.piece_finished", str(self.working_piece.order_id))
 
     def add_pieces_to_queue(self, pieces):
         for piece in pieces:

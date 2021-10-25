@@ -66,3 +66,22 @@ class ThreadedConsumer:
         order.status = Order.STATUS_DELIVERED
         session.commit()
         Session.close()
+
+    @staticmethod
+    def piece_finished(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+        order_id = int(body)
+        session = Session()
+        try:
+            order = session.query(Order).get(order_id)
+            if order:
+                if order.pieces_created < order.number_of_pieces:
+                    order.pieces_created += 1
+                if order.pieces_created == order.number_of_pieces:
+                    order.status = order.STATUS_FINISHED
+                    publisher_order.publish_msg("event_exchange", "order.finished", str(order_id))
+                session.commit()
+        except KeyError:
+            session.rollback()
+            session.close()
+        session.close()
