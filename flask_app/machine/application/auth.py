@@ -7,6 +7,7 @@ from jwt import InvalidSignatureError
 from werkzeug.exceptions import Unauthorized, abort, Forbidden
 
 from . import Config
+from . import publisher_machine
 
 base_url_client = "http://{}:{}/".format(Config.CLIENT_IP, Config.GUNICORN_PORT)
 
@@ -24,6 +25,9 @@ class RsaSingleton(object):
             try:
                 response = requests.get(str(base_url_client + 'client/get_public_key'), verify=False).json()
                 RsaSingleton.public_key = response['public_key']
+                publisher_machine.publish_msg("event_exchange", "auth.certificate", "New certificate created for "
+                                                                                     "Machine")
+
             except:
                 print('Machine waiting for public key', flush=True)
                 sleep(3)
