@@ -33,11 +33,12 @@ class RsaSingleton(object):
     def check_jwt_admin(jwt_token):
         try:
             payload = jwt.decode(str.encode(jwt_token), RsaSingleton.public_key, algorithms='RS256')
+            print(payload, flush=True)
             # comprobar tiempo de expiración
             if payload['exp'] < datetime.timestamp(datetime.utcnow()):
                 abort(Forbidden.code, "JWT Token expired")
             # comprobar rol
-            if (payload['id'], 1) not in payload['roles']:
+            if [payload['id'], 1] not in payload['roles']:
                 abort(Forbidden.code, "Resource only allowed to 'admin' users")
         except InvalidSignatureError:
             abort(Unauthorized.code, "JWT signature verification failed")
