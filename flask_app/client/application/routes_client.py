@@ -76,11 +76,10 @@ def create_jwt():
 
     except NoResultFound:
         abort(NotFound.code, "Given user id not found in the Database")
-    except Exception as e:
-        print(e, flush=True)
+    except Exception:
         session.rollback()
         session.close()
-        abort(BadRequest.code)
+        abort(Unauthorized.code, "Invalid password")
 
     session.close()
     return response
