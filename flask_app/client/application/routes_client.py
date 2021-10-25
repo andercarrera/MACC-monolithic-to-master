@@ -50,6 +50,86 @@ def create_client():
     return response
 
 
+@app.route('/clients', methods=['GET'])
+def view_clients():
+    session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
+    clients = session.query(Client).all()
+    response = jsonify(Client.list_as_dict(clients))
+    session.close()
+    return response
+
+
+@app.route('/client/<int:client_id>', methods=['GET'])
+def view_client(client_id):
+    session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
+    client = session.query(Client).get(client_id)
+    if not client:
+        abort(NotFound.code, "Given user id not found in the Database")
+    response = jsonify(client.as_dict())
+    session.close()
+    return response
+
+
+@app.route('/client/<client_id>', methods=['PUT'])
+def update_client(client_id):
+    session = Session()
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    content = request.json
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt_token)
+
+    client = session.query(Client).get(client_id)
+    if not client:
+        abort(NotFound.code, "Given user id not found in the Database")
+
+    try:
+        client.email = content['email']
+        client.username = content['username']
+        client.password = bcrypt.hashpw(content['password'].encode(), bcrypt.gensalt()).decode('utf-8')
+
+        session.commit()
+    except NoResultFound:
+        abort(NotFound.code, "Given user_id not found")
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
+    response = jsonify(client.as_dict())
+    session.close()
+    return response
+
+
+@app.route('/client/<client_id>', methods=['DELETE'])
+def delete_client(client_id):
+    session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt)
+
+    client = session.query(Client).get(client_id)
+    if not client:
+        abort(NotFound.code, "Role not found for given order id")
+
+    session.delete(client)
+    session.commit()
+    response = jsonify(client.as_dict())
+    session.close()
+    return response
+
+
+# JWT Routes
+# #########################################################################################################
+
 @app.route('/client/create_jwt', methods=['GET'])
 def create_jwt():
     session = Session()
@@ -89,34 +169,6 @@ def create_jwt():
 def get_public_key():
     content = {'public_key': RsaSingleton.get_public_key().decode()}
     return content
-
-
-@app.route('/clients', methods=['GET'])
-def view_clients():
-    session = Session()
-
-    jwt_token = get_jwt_from_request()
-    RsaSingleton.check_jwt_any_role(jwt_token)
-
-    clients = session.query(Client).all()
-    response = jsonify(Client.list_as_dict(clients))
-    session.close()
-    return response
-
-
-@app.route('/client/<int:client_id>', methods=['GET'])
-def view_client(client_id):
-    session = Session()
-
-    jwt_token = get_jwt_from_request()
-    RsaSingleton.check_jwt_any_role(jwt_token)
-
-    client = session.query(Client).get(client_id)
-    if not client:
-        abort(NotFound.code, "Given user id not found in the Database")
-    response = jsonify(client.as_dict())
-    session.close()
-    return response
 
 
 def get_jwt_from_request():
