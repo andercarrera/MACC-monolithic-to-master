@@ -34,13 +34,13 @@ def create_client():
             password=bcrypt.hashpw(content['password'].encode(), bcrypt.gensalt()).decode('utf-8'),
         )
         role = session.query(Role).filter_by(id=content['role_id']).one()
-        if role is None:
-            abort(NotFound.code, "Given role_id not found")
-        else:
-            new_client.roles.append(role)
+
+        new_client.roles.append(role)
 
         session.add(new_client)
         session.commit()
+    except NoResultFound:
+        abort(NotFound.code, "Given role_id not found")
     except KeyError:
         session.rollback()
         session.close()
