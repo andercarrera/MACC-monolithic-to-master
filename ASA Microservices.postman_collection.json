@@ -1,0 +1,654 @@
+{
+	"info": {
+		"_postman_id": "fe4fc2bd-39f2-4429-a490-0392725aea6f",
+		"name": "ASA Microservices",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "client",
+			"item": [
+				{
+					"name": "https://192.168.17.8/client",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJhc2RmIiwic2VydmljZSI6ZmFsc2UsInJvbGVzIjpbWzUsMl1dLCJleHAiOjE2MzUxNjc5NzB9.dKhElrMvOpP1bd6DaUqvZk3xb7xehwuysGeEjjkjJ4w0CkVm5CKxCJWUdLXTIoHYzmFvpL-1u1mmHJB8GPLmMih6El3pQ8vnC_E_skJ5-EPU0KvHkICypYF3MsmNpNqEQF31orOG4f-ANRi0mEiWJFnybkwt0IqUeiXAEE1GQu_zGhfpPKm5c4YVMxMFHmu9seZXnawzZQ1HyAxZ4JKv38S0mBNfLZCJ-hE8jkmggxRX-BQZLzUvkLFkAFV8J0crJpGVkPCW9c3QgdXps4XO4KHG2VrVB_PzVStfd66uVuao_UvMq70hKjDTLMqpZmp4y2S00nmPEtnISu_HvsMcOA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"asdf@asdf.com\",\n    \"status\":\"created\",\n    \"username\":\"asdf\",\n    \"password\":\"asdf\",\n    \"role_id\":2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/create_jwt",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client/create_jwt",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"create_jwt"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/create_jwt Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client/get_public_key",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"get_public_key"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/clients",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MzUyMDczfQ.Faarz-7EUUeem-i10ZivP3Dem5AJIfFAOndJxzgRcNsWssnu7XUPoNJhSmG9NZQxGRXWEMfKtUh84VNRQNgKTTz-ACwC7iq0gVmTOTdAvFub8Fyhkt1_WgxgXr1lZCpCyKuSHaeAlMMxz4OdAPLsfNmoW3F0dSYuqwjATsGO5hjkrWaF6GNI0cl2sGSsOKR9AKoIO35Falcq8kbESjTcGU8F1Zj16q9vkOxjulS6Wdtxv2dwC0ific7bp6pBSYGkwgwy3vFG-FbmiBby0p7cR5g2um3OZQt9rphqP8N_Cdwc9MJVDNZUn7x6gHhR4-NJqsf7pt4oBGqkWzjDrbVbkw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/clients",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/10",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MTcxMjg3fQ.KZZEbDwd5yfbqmgvXD1zVLl1ywEtBxIF6ZuuMCjeWLPO8dy-eRBDcRFpSVxLfqscRtOgbbUsloH5PRZBSooHEkhafml96Mx5V4EZkFnfzgkl8gdxOEQX24gFT0wWuwMgMyM3d2NojAz9uExGMZzEr3ztIlWVGJgU6T33rFShxWr0ryc621BQrCEXKNHFb_uBZ1HYh6ndML3EUw52lJ5gzBUUeuMKMVlCC4RFiEhSt9GqbKRdVhYUVR2e9SZehHJWUNulmWY3FLX4JRV7ohffG2Yut3B3w3C4VGxMULu_FxdBWWB5zEVGFRUFfvcX1hMMQBZPCaz7hHTgyPMaw5O_Rg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/client/10",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MTc1MjY3fQ.iF7h2vwV05LUnRIzajYCwPnkCBZ-dpMKStQAxxVlWfPr0brhNcGl8yAugeojZmjvcn3y_4O-ZKU4DZh1bmwju-3l0u7oKzbcwkGofLwV-psW7MIKqTHK2rYlbhJinjCGEhHCOc4GxoxuXjVIu7Hab3uITcqX-PNB97F-5ZtCVIMFYHcxyixaA8Na9w-J6nM5OZO2EtjFDAIw44Y2x1TQzk8nVbWTKgMIWA8Cv6ZIX5uZRDOqo4veQ8ruuVSeb7sNkqN9nZtvxCDs3eiGOf_UBYNBni94FsqUVy1V7DBYDwSPi5WBQFM4c4h1CKk3qkPKkg3zsp8qLxi8wDDFD2FPvA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"asdf@asdf.com\",\n    \"username\":\"asdf\",\n    \"password\":\"asdf\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client/1",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MzUyMTk4fQ.JkAMFA0vvzz0IIsnFaphJBy1pWOJ7WbUlZulkg1IZ0O67Vi-8RNNBnob4H6T5ZpRFZ2C0zrMADSylmSONFCroMNtoLCvmOKVDZFaPn7qctTu7DFtOYzbFu0m71xqkf_j33el9sQ9UrQnFXqTHAEWKlpFIHEjvwHaexUagMbHuSh9HAqYfDXmiaOtsCS5V4Ktkg1A3CZ9wapX7VWDfMj5Ul4pXcWDHQSy4n9kopEk4ON39u6lukE6dI1Llzrkjt9SXYxJ-tksN0t07rHHDSU7kOIwOStW7tVDGOfwvfC4QvMn6fCdJFLFavaRbDBJnSYEVXwt-8P14WH-RDS4_UnlzA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client/2",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJhc2RmIiwic2VydmljZSI6ZmFsc2UsInJvbGVzIjpbWzIsMl1dLCJleHAiOjE2MzUzNTE5NTV9.c_VvGc9n413aGIsC4pPLRnnQ8VXgQfMgwuNSKW7so-4zV3bEYKcLF0jeSXm2pU4KhYy9w-iihhB6KSbtHAHDGdPE521iSSvdzg3A-KNfsvpOjEooh1HFe7sWppAHKkZPvPt3ej-2UI31t7pqJV45kfHSkpL8J6BLq4F70sQmVCjntHGQ5NIHEtGCE4h9njFfb_Nu-LEB5iGeU7QFV2_K3a9w1OMJfn5D2vxC0TeSjr4ObesqXalkY71YbLL7TY5-4U-egvAsLUkFCEyYWmfzVe6MjyKmPhc9YaF9xRvaocaRQcdIcm-_AW26QrnZvw72uS-WwP5l3yoSH8dmkZJ48A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/client/role",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"role"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhc2RmIiwic2VydmljZSI6ZmFsc2UsInJvbGVzIjpbWzMsMV1dLCJleHAiOjE2MzUxNjc3MzJ9.dwERauywT-ozefKXmtASiOx0d8DthGEDJKVJeQHv1BJLfITamtlVQd_p1kBLExOt6CmgyDpghDDB-22wzrumS_ch90HqIxxt8_CLlfJUX4g_Wh3DcisvOd4K39WiRIsZBQjV6R_fIwi9P85pvpinJnC_B6KwmFryIgQzPl9OMUBcjXtGjbt4bAZusiBtCXWmtt4PlxexB0cnIokkE3TKK3Gf7uMnWIMjXWTtVGg5x1xNugvtzhfhDOjJHTkdU-q4-frPtX6IXyvivoBA6f4skt-EG0swKoTtMAhjcAlds58SHZoYva8qTWxIyqigR9LCHk48eoWib3xJOZYFlc7pAw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client/role",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"role"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MzUyMDczfQ.Faarz-7EUUeem-i10ZivP3Dem5AJIfFAOndJxzgRcNsWssnu7XUPoNJhSmG9NZQxGRXWEMfKtUh84VNRQNgKTTz-ACwC7iq0gVmTOTdAvFub8Fyhkt1_WgxgXr1lZCpCyKuSHaeAlMMxz4OdAPLsfNmoW3F0dSYuqwjATsGO5hjkrWaF6GNI0cl2sGSsOKR9AKoIO35Falcq8kbESjTcGU8F1Zj16q9vkOxjulS6Wdtxv2dwC0ific7bp6pBSYGkwgwy3vFG-FbmiBby0p7cR5g2um3OZQt9rphqP8N_Cdwc9MJVDNZUn7x6gHhR4-NJqsf7pt4oBGqkWzjDrbVbkw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"maintainer\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/client/role/2",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"role",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/client/role/2",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MTcyMzUzfQ.hWIvpGTJZwfq8QwUxE4TpcH99ryZmTks4X6K4H2nDLyaZjZu9tXWf1JJ6Cr8csivkX-uONkFOD0Kk5bqkIW1FcVFoLUaWBeh9J2uTCSx6ZUuVngD-Q4SnhR8m5fmGxYzzTPNlQBhbwfa4pB9WoWIDPTjlCpAg4SBE1XkZMaD4y2kMACsw8gubo_RtCHYQp-9X4AwLiF6WeweaJ-QsdWrc-FWqxdwkH04BZC4hnTjzfffVpqiMS9Yp2dybHp6NzD2BxlkiJh5YYyXXsQtiNv8KP31u84RHqbDpXPjAl-K56iiTuJNz0ouufCNpGzkW-BJM2ORoKEkicpbyd2PUN68hw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/client/role/2",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"client",
+								"role",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payment",
+			"item": [
+				{
+					"name": "https://192.168.17.8/payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJhc2RmIiwic2VydmljZSI6ZmFsc2UsInJvbGVzIjpbWzUsMl1dLCJleHAiOjE2MzUxNzAzOTF9.T_5kjSY-RbgjOueXviM4vsnxNPYJrzuyc1K6nKvKeZSHrHi9tTSX-lfOEk5-yrr4mx1hOoDhih02m-OkK6_pUPmC89Ij6SZ9XG_xSn_Tfz0hCqelNZOFlTNsFtjHhKHxh_JD3iVw5VX5ZVfqVMoJKLBbaDObtJhLhefLnt-zGSaKV1fJg9Q5Cj_9AyiWCoOZ_-NLfNXrrQ26eoVYjafPZqjylF2ZHXZbwmOW1GgQs8kBq7Y46hrynQ6UyUbUyxMmdLkH16gF_wEVJp0oct3nyfzMKcSOinYgfZ2CQSHZsqoi0KhDjHP8cPt34z70XTz2r4BJqsCOgYchEghkmBL9qA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"New payment created from REST API\",\r\n    \"payment_amount\": 800,\r\n    \"client_id\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/payment",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/payments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInNlcnZpY2UiOmZhbHNlLCJyb2xlcyI6W1sxLDFdXSwiZXhwIjoxNjM1MTcxMjg3fQ.KZZEbDwd5yfbqmgvXD1zVLl1ywEtBxIF6ZuuMCjeWLPO8dy-eRBDcRFpSVxLfqscRtOgbbUsloH5PRZBSooHEkhafml96Mx5V4EZkFnfzgkl8gdxOEQX24gFT0wWuwMgMyM3d2NojAz9uExGMZzEr3ztIlWVGJgU6T33rFShxWr0ryc621BQrCEXKNHFb_uBZ1HYh6ndML3EUw52lJ5gzBUUeuMKMVlCC4RFiEhSt9GqbKRdVhYUVR2e9SZehHJWUNulmWY3FLX4JRV7ohffG2Yut3B3w3C4VGxMULu_FxdBWWB5zEVGFRUFfvcX1hMMQBZPCaz7hHTgyPMaw5O_Rg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/payments",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "https://192.168.17.8/order/2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/order/3",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"order",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"New order created from REST API\",\n    \"number_of_pieces\": 5,\n    \"client_id\":2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/order",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "delivery",
+			"item": [
+				{
+					"name": "https://192.168.17.8/delivery/confirm/1",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\":\"asdf\",\n    \"jwt\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhc2RmIiwic2VydmljZSI6ZmFsc2UsInJvbGUiOiJhZG1pbiIsImV4cCI6MTYzNTA4MDk3Nn0.MTWh9kw_7SdP7U2skcDb3rWlsVrugwqv90gqR1FhIK8a3WBusv8rJkQWQXoswbjmuZrH4fKYGOKiagKSy9Pgo374QO1x74KntHOjZpVQY8OlSjpChymC8f0ZXnmFU7Jc7M6RCLHoaH9_yI2pAheAyyqjvcUE9hlBwDu31LZOooGWuq7fgOsVy5cZNiiA5dYl8B0Pmu7S4PiOcCW9YT1dn5U5gpYMsyq0-510FeCMglRNusmGICAgXmLKgGCShK1aoEQcNK38N04F_Kk7iTgNLhM7KjQVkNCHI87uCn67hHJGae4NoU36ao2uoi64x5iDDwebRR7BrQaUnTDVReED5A\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://192.168.17.8/delivery/confirm/1",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"delivery",
+								"confirm",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://192.168.17.8/delivery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.17.8/delivery",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"17",
+								"8"
+							],
+							"path": [
+								"delivery"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "https://192.168.17.8/pieces",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://192.168.17.8/pieces",
+					"protocol": "https",
+					"host": [
+						"192",
+						"168",
+						"17",
+						"8"
+					],
+					"path": [
+						"pieces"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
