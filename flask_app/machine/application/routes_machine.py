@@ -2,7 +2,8 @@ import traceback
 
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
+from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized, \
+    ServiceUnavailable
 
 from . import Session
 from .auth import RsaSingleton
@@ -65,6 +66,16 @@ def view_machine_status():
         working_piece = working_piece.as_dict()
     response = {"status": my_machine.status, "working_piece": working_piece, "queue": list(queue)}
     return jsonify(response)
+
+
+# Health Check #######################################################################################################
+@app.route('/machine/health', methods=['GET'])
+def health_check():
+    public_key = RsaSingleton.get_public_key()
+    if not public_key:
+        abort(ServiceUnavailable.code)
+
+    return 'OK', 200
 
 
 # Error Handling #######################################################################################################

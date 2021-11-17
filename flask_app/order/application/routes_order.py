@@ -1,11 +1,12 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
 
 from . import Session
 from . import publisher_order
 from .auth import RsaSingleton
 from .model_order import Order
+
 
 # Order Routes #########################################################################################################
 
@@ -98,3 +99,13 @@ def delete_order(order_id):
     response = jsonify(order.as_dict())
     session.close()
     return response
+
+
+# Health Check #######################################################################################################
+@app.route('/order/health', methods=['GET'])
+def health_check():
+    public_key = RsaSingleton.get_public_key()
+    if not public_key:
+        abort(ServiceUnavailable.code)
+
+    return 'OK', 200

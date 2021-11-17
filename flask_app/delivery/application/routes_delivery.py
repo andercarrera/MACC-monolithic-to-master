@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
 
 # Delivery Routes ######################################################################################################
 from . import Session
@@ -83,3 +83,13 @@ def view_delivery(delivery_id):
     response = jsonify(delivery.as_dict())
     session.close()
     return response
+
+
+# Health Check #######################################################################################################
+@app.route('/delivery/health', methods=['GET'])
+def health_check():
+    public_key = RsaSingleton.get_public_key()
+    if not public_key:
+        abort(ServiceUnavailable.code)
+
+    return 'OK', 200

@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized
+from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
 
 from . import Session
 from .auth import RsaSingleton
@@ -9,6 +9,7 @@ from .model_payment import Payment
 
 piece_price = 10
 base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
+
 
 # Payment Routes #######################################################################################################
 
@@ -77,3 +78,13 @@ def view_payments():
     response = jsonify(Payment.list_as_dict(payments))
     session.close()
     return response
+
+
+# Health Check #######################################################################################################
+@app.route('/client/health', methods=['GET'])
+def health_check():
+    public_key = RsaSingleton.get_public_key()
+    if not public_key:
+        abort(ServiceUnavailable.code)
+
+    return 'OK', 200

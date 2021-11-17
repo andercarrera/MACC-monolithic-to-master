@@ -7,7 +7,8 @@ import jwt
 from flask import current_app as app
 from flask import request, jsonify, abort
 from sqlalchemy.orm.exc import NoResultFound
-from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
+from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized, \
+    ServiceUnavailable
 
 from . import Session
 from .model_client import Client, Role, client_role_table
@@ -296,6 +297,15 @@ def delete_role(role_id):
     response = jsonify(role.as_dict())
     session.close()
     return response
+
+# Health Check #######################################################################################################
+@app.route('/client/health', methods=['GET'])
+def health_check():
+    public_key = RsaSingleton.get_public_key()
+    if not public_key:
+        abort(ServiceUnavailable.code)
+
+    return 'OK', 200
 
 
 # Error Handling #######################################################################################################
