@@ -1,4 +1,5 @@
 import datetime
+import secrets
 import traceback
 
 import bcrypt
@@ -8,9 +9,9 @@ from flask import request, jsonify, abort
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized
 
+from . import Session
 from .model_client import Client, Role, client_role_table
 from .mycrypto import RsaSingleton
-from . import Session
 
 
 # Client Routes
@@ -144,22 +145,55 @@ def create_jwt():
         if not bcrypt.checkpw(auth['password'].encode('utf-8'), user.password.encode('utf-8')):
             raise Exception
         payload = {
-            'id': user.id,
-            'username': user.username,
-            'service': False,
+            'sub': user.id,
             'roles': roles,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }
+        refresh_token = secrets.token_urlsafe(32)
+
         response = {
-            'jwt': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256')
+            'jwt_token': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256'),
+            'refresh_token': refresh_token
         }
 
+        user.refresh_token = refresh_token
+        session.commit()
     except NoResultFound:
         abort(NotFound.code, "Given user id not found in the Database")
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
     except Exception:
         session.rollback()
         session.close()
         abort(Unauthorized.code, "Invalid password")
+
+    session.close()
+    return response
+
+
+@app.route('/client/refresh_jwt', methods=['GET'])
+def refresh_jwt():
+    session = Session()
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    response = None
+    try:
+        refresh_token = get_jwt_from_request()
+        user = session.query(Client).filter(Client.refresh_token == refresh_token).one()
+        roles = session.query(client_role_table).filter_by(client_id=user.id).all()
+
+        payload = {
+            'sub': user.id,
+            'roles': roles,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }
+        response = {
+            'jwt_token': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256'),
+        }
+    except NoResultFound:
+        abort(NotFound.code, "No user found with the given refresh token")
 
     session.close()
     return response

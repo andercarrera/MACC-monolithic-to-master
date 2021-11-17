@@ -44,6 +44,7 @@ class Client(BaseModel):
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
     username = Column(TEXT, nullable=False)
     password = Column(TEXT, nullable=False)
+    refresh_token = Column(TEXT, nullable=True)
     roles = relationship("Role", secondary=client_role_table, back_populates="clients")
 
 
