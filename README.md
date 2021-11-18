@@ -1,4 +1,4 @@
-# [MSG FOR ALAIN & FELIX] HOW TO TEST THE APPLICATION CORRECTLY
+# HOW TO TEST THE APPLICATION CORRECTLY
 1. Check JWT:
    1. JWT Signature failed (request with invalid token)
    2. Get token: bad password and bad user_id error management
