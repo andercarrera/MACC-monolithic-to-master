@@ -60,11 +60,17 @@ def view_piece(piece_ref):
 # Machine Routes #######################################################################################################
 @app.route('/machine/status', methods=['GET'])
 def view_machine_status():
+    session = Session()
+
+    jwt_token = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt_token)
+
     working_piece = my_machine.working_piece
     queue = my_machine.queue
     if working_piece:
         working_piece = working_piece.as_dict()
     response = {"status": my_machine.status, "working_piece": working_piece, "queue": list(queue)}
+    session.close()
     return jsonify(response)
 
 
