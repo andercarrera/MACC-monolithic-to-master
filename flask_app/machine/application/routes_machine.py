@@ -75,7 +75,8 @@ def view_machine_status():
 
 
 # Health Check #######################################################################################################
-@app.route('/machine/health', methods=['GET'])
+@app.route('/machine/health', methods=['HEAD', 'GET'])
+@app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()
     if not public_key:

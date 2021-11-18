@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, ServiceUnavailable
 
 from . import Session
 from .auth import RsaSingleton
@@ -28,3 +28,14 @@ def get_logs():
     response = jsonify(Log.list_as_dict(logs))
     session.close()
     return response
+
+
+# Health Check #######################################################################################################
+@app.route('/logs/health', methods=['HEAD', 'GET'])
+@app.route('/health', methods=['HEAD', 'GET'])
+def health_check():
+    public_key = RsaSingleton.get_public_key()
+    if not public_key:
+        abort(ServiceUnavailable.code)
+
+    return 'OK', 200

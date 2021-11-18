@@ -86,7 +86,8 @@ def view_delivery(delivery_id):
 
 
 # Health Check #######################################################################################################
-@app.route('/delivery/health', methods=['GET'])
+@app.route('/delivery/health', methods=['HEAD', 'GET'])
+@app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()
     if not public_key:

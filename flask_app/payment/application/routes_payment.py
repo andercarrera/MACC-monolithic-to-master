@@ -81,7 +81,8 @@ def view_payments():
 
 
 # Health Check #######################################################################################################
-@app.route('/client/health', methods=['GET'])
+@app.route('/client/health', methods=['HEAD', 'GET'])
+@app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()
     if not public_key:

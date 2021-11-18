@@ -104,7 +104,8 @@ def delete_order(order_id):
 
 
 # Health Check #######################################################################################################
-@app.route('/order/health', methods=['GET'])
+@app.route('/order/health', methods=['HEAD', 'GET'])
+@app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()
     if not public_key:
