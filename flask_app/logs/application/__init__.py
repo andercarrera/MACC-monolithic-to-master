@@ -1,6 +1,6 @@
 from flask import Flask
-from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from .config_logs import Config
 
@@ -18,6 +18,7 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
 
     with app.app_context():
-        from . import model_log
-        model_log.Base.metadata.create_all(engine)
+        from . import routes_logs
+        from . import model_logs
+        model_logs.Base.metadata.create_all(engine)
         return app

@@ -1,9 +1,13 @@
 from application import create_app
 from application.subscriber_logs import ThreadedConsumer
+from application.auth import RsaSingleton
 
 app = create_app()
 
 ThreadedConsumer('event_exchange', '#', ThreadedConsumer.get_logs)
+
+# request jwt public key
+RsaSingleton.request_public_key()
 
 app.app_context().push()
 

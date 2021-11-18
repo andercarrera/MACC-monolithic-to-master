@@ -7,7 +7,7 @@ import requests
 from flask import jsonify
 
 from . import Session, Config
-from .model_log import Log
+from .model_logs import Log
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
 ssl.match_hostname = lambda cert, hostname: True
@@ -52,7 +52,7 @@ class ThreadedConsumer:
         try:
             new_log = Log(
                 queue_name=method.routing_key,
-                message=content
+                message=content.decode("utf-8")
             )
             session.add(new_log)
             session.commit()
