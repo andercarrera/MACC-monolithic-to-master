@@ -1,6 +1,9 @@
+import json
 import ssl
 import threading
 import pika
+from flask import jsonify
+
 from . import Session, Config, publisher_payment
 from .model_payment import Payment
 
@@ -44,7 +47,8 @@ class ThreadedConsumer:
     @staticmethod
     def check_balance(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body))
-        dictionary = eval(body)
+        dictionary = json.loads(body)
+        print("\ndatos: {}\n".format(dictionary))
         number_of_pieces = dictionary['number_of_pieces']
         client_id = dictionary['client_id']
         order_id = dictionary['order_id']
@@ -85,14 +89,9 @@ class ThreadedConsumer:
 
 def order_accepted(order_id, payed):
     if payed:
-        payment_status = "Accepted"
+        publisher_payment.publish_msg("event_exchange", "payment.Accepted", str(order_id))
     else:
-        payment_status = "Denied"
-
-    datos = {"order_id": order_id,
-             "payment_status": payment_status}
-    publisher_payment.publish_msg("event_exchange", "payment.status", str(datos))
-
+        publisher_payment.publish_msg("event_exchange", "payment.Denied", str(order_id))
 
 def del_payment(client_id):
     session = Session()

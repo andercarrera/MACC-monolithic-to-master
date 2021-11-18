@@ -1,7 +1,10 @@
 # !/usr/bin/env python
+import json
 import ssl
 import threading
 import pika
+from flask import jsonify
+
 from . import Config, Session, publisher_order
 from .model_order import Order
 
@@ -40,20 +43,25 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def check_status(channel, method, properties, body):
+    def status_accepted(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body))
-        dictionary = eval(body)
-        order_id = dictionary['order_id']
-        status = dictionary['payment_status']
+        order_id = int(body)
         session = Session()
         order = session.query(Order).get(order_id)
-        if status == "Accepted":
-            datos = {"number_of_pieces": order.number_of_pieces,
-                     "order_id": order_id}
-            order.status = order.STATUS_CREATED
-            publisher_order.publish_msg("event_exchange", "order.payed", str(datos))
-        elif status == "Denied":
-            order.status = order.STATUS_CANCELLED
+        datos = {"number_of_pieces": order.number_of_pieces,
+                 "order_id": order_id}
+        order.status = order.STATUS_CREATED
+        publisher_order.publish_msg("event_exchange", "order.payed", json.dumps(datos))
+        session.commit()
+        session.close()
+
+    @staticmethod
+    def status_denied(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+        order_id = int(body)
+        session = Session()
+        order = session.query(Order).get(order_id)
+        order.status = order.STATUS_CANCELLED
         session.commit()
         session.close()
 

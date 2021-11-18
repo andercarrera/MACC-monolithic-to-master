@@ -1,3 +1,4 @@
+import json
 from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
@@ -36,7 +37,8 @@ def create_order():
         datos = {"number_of_pieces": new_order.number_of_pieces,
                  "client_id": new_order.client_id,
                  "order_id": new_order.id}
-        publisher_order.publish_msg("event_exchange", "order.created", str(datos))
+        publisher_order.publish_msg("event_exchange", "order.created", json.dumps(datos))
+        print("\ndatos: {}\njson datos: {} \n".format(datos, json.dumps(datos)))
     except KeyError:
         session.rollback()
         session.close()

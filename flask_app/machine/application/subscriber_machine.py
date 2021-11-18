@@ -1,4 +1,5 @@
 # !/usr/bin/env python
+import json
 import ssl
 import threading
 import pika
@@ -45,7 +46,7 @@ class ThreadedConsumer:
     @staticmethod
     def start_producing(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body), flush=True)
-        dictionary = eval(body)
+        dictionary = json.loads(body)
         number_of_pieces = dictionary['number_of_pieces']
         order_id = dictionary['order_id']
         session = Session()
