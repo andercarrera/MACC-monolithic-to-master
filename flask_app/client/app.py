@@ -4,6 +4,7 @@ from werkzeug.exceptions import BadRequest
 
 from application import create_app, Session
 from application.model_client import Client, Role
+from application import log
 
 
 def initDB():
@@ -35,6 +36,8 @@ def initDB():
 app = create_app()
 initDB()
 app.app_context().push()
+
+log.create_log('Application initialized', 'info')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=13000)

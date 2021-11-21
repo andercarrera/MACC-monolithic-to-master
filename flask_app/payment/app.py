@@ -1,6 +1,7 @@
 from application import create_app
 from application.subscriber_payment import ThreadedConsumer
 from application.auth import RsaSingleton
+from application import log
 
 app = create_app()
 
@@ -10,6 +11,8 @@ ThreadedConsumer('event_exchange', 'order.created', ThreadedConsumer.check_balan
 RsaSingleton.request_public_key()
 
 app.app_context().push()
+
+log.create_log('Application initialized', 'info')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=13004)

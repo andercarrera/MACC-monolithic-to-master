@@ -10,7 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, UnsupportedMediaType, Unauthorized, \
     ServiceUnavailable
 
-from . import Session
+from . import Session, log
 from .model_client import Client, Role, client_role_table
 from .mycrypto import RsaSingleton
 
@@ -43,7 +43,8 @@ def create_client():
         session.commit()
     except NoResultFound:
         abort(NotFound.code, "Given role_id not found")
-    except KeyError:
+    except KeyError as e:
+        log.create_log(e, 'error')
         session.rollback()
         session.close()
         abort(BadRequest.code)
@@ -102,7 +103,8 @@ def update_client(client_id):
         session.commit()
     except NoResultFound:
         abort(NotFound.code, "Given user_id not found")
-    except KeyError:
+    except KeyError as e:
+        log.create_log(e, 'error')
         session.rollback()
         session.close()
         abort(BadRequest.code)
@@ -161,7 +163,8 @@ def create_jwt():
         session.commit()
     except NoResultFound:
         abort(NotFound.code, "Given user id not found in the Database")
-    except KeyError:
+    except KeyError as e:
+        log.create_log(e, 'error')
         session.rollback()
         session.close()
         abort(BadRequest.code)
@@ -246,7 +249,8 @@ def creat_role():
         )
         session.add(new_role)
         session.commit()
-    except KeyError:
+    except KeyError as e:
+        log.create_log(e, 'error')
         session.rollback()
         session.close()
         abort(BadRequest.code)
@@ -272,7 +276,8 @@ def update_role(role_id):
     try:
         role.name = content['name']
         session.commit()
-    except KeyError:
+    except KeyError as e:
+        log.create_log(e, 'error')
         session.rollback()
         session.close()
         abort(BadRequest.code)
