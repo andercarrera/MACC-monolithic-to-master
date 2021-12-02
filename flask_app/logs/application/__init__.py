@@ -2,6 +2,7 @@ from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+from .BLConsul import BLConsul
 from .config_logs import Config
 
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
@@ -20,5 +21,7 @@ def create_app():
     with app.app_context():
         from . import routes_logs
         from . import model_logs
+        consul = BLConsul.get_instance()
+        consul.init_and_register(app)
         model_logs.Base.metadata.create_all(engine)
         return app

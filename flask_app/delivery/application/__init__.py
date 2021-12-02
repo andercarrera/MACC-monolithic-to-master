@@ -1,6 +1,8 @@
 from flask import Flask
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
+
+from .BLConsul import BLConsul
 from .config_delivery import Config
 
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
@@ -19,5 +21,7 @@ def create_app():
     with app.app_context():
         from . import routes_delivery
         from . import model_delivery
+        consul = BLConsul.get_instance()
+        consul.init_and_register(app)
         model_delivery.Base.metadata.create_all(engine)
         return app

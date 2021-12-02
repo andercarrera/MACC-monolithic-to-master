@@ -23,6 +23,12 @@ services:
       RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'client'
+      SERVICE_ID: 'client'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
     networks:
       lb7_network:
         ipv4_address: '${CLIENT_IP}'
@@ -49,6 +55,12 @@ services:
       RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'delivery'
+      SERVICE_ID: 'delivery'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
     networks:
       lb7_network:
         ipv4_address: '${DELIVERY_IP}'
@@ -75,6 +87,12 @@ services:
       RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'machine'
+      SERVICE_ID: 'machine'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
     networks:
       lb7_network:
         ipv4_address: '${MACHINE_IP}'
@@ -101,6 +119,12 @@ services:
       RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'order'
+      SERVICE_ID: 'order'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
     networks:
       lb7_network:
         ipv4_address: '${ORDER_IP}'
@@ -127,6 +151,12 @@ services:
       RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'payment'
+      SERVICE_ID: 'payment'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
     networks:
       lb7_network:
         ipv4_address: '${PAYMENT_IP}'
@@ -154,6 +184,12 @@ services:
       RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'logs'
+      SERVICE_ID: 'logs'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
     networks:
       lb7_network:
         ipv4_address: '${LOGS_IP}'
@@ -203,6 +239,7 @@ services:
       - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
       - 'GUNICORN_PORT=${GUNICORN_PORT}'
       - 'LOGS_IP=${LOGS_IP}'
+      - 'CONSUL_IP=${CONSUL_IP}'
     restart: unless-stopped
     #db:
     #image: mysql
@@ -214,7 +251,18 @@ services:
     #  MYSQL_USER: '${MYSQL_USER}'
     #  MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
     #  MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-
+  consul:
+      image: 'consul:latest'
+      ports:
+        - '8300:8300'
+        - '8301:8301'
+        - '8301:8301/udp'
+        - '8500:8500'
+        - '8600:8600'
+        - '8600:8600/udp'
+      networks:
+        lb7_network:
+          ipv4_address: '${CONSUL_IP}'
 networks:
   lb7_network:
     driver: bridge
