@@ -89,7 +89,7 @@ class ThreadedConsumer:
             client.payment_amount += money
             client.payment_reserved -= money
             session.commit()
-            create_log('Payment cancelled', 'info')
+            create_log('Payment cancelled', 'saga')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
@@ -105,7 +105,7 @@ class ThreadedConsumer:
             money = content['number_of_pieces'] * piece_price
             client.payment_reserved -= money
             session.commit()
-            create_log('Removed reserved money, accepted payment', 'info')
+            create_log('Removed reserved money, accepted payment', 'saga')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()

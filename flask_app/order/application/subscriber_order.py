@@ -83,7 +83,7 @@ class ThreadedConsumer:
             order = session.query(Order).get(content['order_id'])
             order.status = order.STATUS_CANCELLED
             session.commit()
-            create_log('Order cancelled', 'info')
+            create_log('Order cancelled', 'saga')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()

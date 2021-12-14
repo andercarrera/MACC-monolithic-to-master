@@ -81,7 +81,7 @@ class ThreadedConsumer:
                 session.add(new_delivery)
                 session.commit()
                 session.close()
-                create_log('Delivery created', 'info')
+                create_log('Delivery created', 'saga')
                 content['status'] = status
                 content['type'] = 'DELIVERY'
                 publish_msg("sagas_commands", "sagas.delivery", json.dumps(content))
@@ -105,7 +105,7 @@ class ThreadedConsumer:
         try:
             session.query(Delivery).filter(Delivery.order_id == content['order_id']).one().delete()
             session.commit()
-            create_log('Delivery removed', 'info')
+            create_log('Delivery removed', 'saga')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
