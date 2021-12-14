@@ -5,7 +5,8 @@ from application import log
 
 app = create_app()
 
-ThreadedConsumer('event_exchange', 'order.created', ThreadedConsumer.check_balance)
+ThreadedConsumer('sagas_commands', 'payment.reserved', ThreadedConsumer.payment_reserved_accepted)
+ThreadedConsumer('sagas_commands', 'payment.reserved.denied', ThreadedConsumer.payment_reserve_cancelled)
 
 # request jwt public key
 RsaSingleton.request_public_key()

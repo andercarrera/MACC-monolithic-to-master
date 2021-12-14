@@ -2,13 +2,16 @@
 import json
 import ssl
 import threading
+
 import pika
 from flask import abort
 from werkzeug.exceptions import NotFound, BadRequest
-from . import Config, Session
-from .model_delivery import Delivery
 
-# solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
+from . import Config, Session
+from .log import create_log
+from .model_delivery import Delivery
+from .publisher_delivery import publish_msg
+
 ssl.match_hostname = lambda cert, hostname: True
 
 
@@ -60,20 +63,65 @@ class ThreadedConsumer:
         session.close()
 
     @staticmethod
-    def create_delivery(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body), flush=True)
-        dictionary = json.loads(body)
-        order_id = dictionary['order_id']
+    def create_delivery(ch, method, properties, body):
+        print("Delivery create callback", flush=True)
         session = Session()
+        print("Delivery create body ", flush=True)
+        print(body, flush=True)
+        content = json.loads(body)
+        status = True
+
+        try:
+            new_delivery = Delivery(
+                order_id=content['order_id'],
+                status=Delivery.STATUS_PREPARING,
+                address=content['address']
+            )
+            if content['zip'].startswith('01') or content['zip'].startswith('20') or content['zip'].startswith('48'):
+                session.add(new_delivery)
+                session.commit()
+                create_log('Delivery created', 'info')
+            else:
+                status = Delivery.STATUS_PREPARING
+        except KeyError:
+            status = Delivery.STATUS_PREPARING
+            session.rollback()
+
+        content['status'] = status
+        content['type'] = 'DELIVERY'
+        publish_msg("sagas_commands", "sagas.delivery", json.dumps(content))
+        session.close()
+
+    # Delivery reserve cancel
+    @staticmethod
+    def cancel_delivery(ch, method, properties, body):
+        print("Delivery cancel callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+        try:
+            session.query(Delivery).filter(Delivery.order_id == content['order_id']).one().delete()
+            session.commit()
+            create_log('Delivery cancelled', 'info')
+        except Exception as e:
+            create_log(str(e), 'info')
+            session.rollback()
+        session.close()
+
+    @staticmethod
+    def update_delivery(ch, method, properties, body):
+        print("Delivery update callback", flush=True)
+        session = Session()
+        order_id = int(body)
         try:
             new_delivery = Delivery(
                 order_id=order_id,
-                status=Delivery.STATUS_PREPARING
+                status=Delivery.STATUS_DELIVERED,
             )
-            session.add(new_delivery)
+            delivery = session.query(Delivery).filter(Delivery.order_id == new_delivery.order_id).one()
+            delivery.status = Delivery.STATUS_DELIVERED
             session.commit()
-        except KeyError:
+            create_log('Delivery updated', 'info')
+        except Exception as e:
             session.rollback()
-            session.close()
-            abort(BadRequest.code)
+            create_log(str(e), 'info')
         session.close()

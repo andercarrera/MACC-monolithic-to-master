@@ -33,3 +33,4 @@ class Payment(BaseModel):
     payment_amount = Column(Integer, nullable=False)
     client_id = Column(Integer, nullable=False)
     description = Column(TEXT, nullable=False, default="No description")
+    payment_reserved = Column(Integer, nullable=False, default=0)

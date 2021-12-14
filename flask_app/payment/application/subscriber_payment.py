@@ -1,11 +1,14 @@
 import json
 import ssl
 import threading
-import pika
-from flask import jsonify
 
-from . import Session, Config, publisher_payment
+import pika
+from sqlalchemy.orm.exc import NoResultFound
+
+from . import Session, Config
+from .log import create_log
 from .model_payment import Payment
+from .publisher_payment import publish_msg
 
 base_url_order = "http://{}:{}/".format(Config.ORDER_IP, Config.GUNICORN_PORT)
 piece_price = 10
@@ -45,64 +48,43 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def check_balance(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body))
-        dictionary = json.loads(body)
-        print("\ndatos: {}\n".format(dictionary))
-        number_of_pieces = dictionary['number_of_pieces']
-        client_id = dictionary['client_id']
-        order_id = dictionary['order_id']
-
-        # pieces_id(number_of_pieces, client_id, order_id)
-        order_cost = number_of_pieces * piece_price
-        balance = 0
+    def payment_reserved_accepted(channel, method, properties, body):
+        print("Payment reserve callback", flush=True)
         session = Session()
+        content = json.loads(body)
+        status = True
+
         try:
-            payment = session.query(Payment).filter_by(client_id=client_id).first()
-            if payment is not None:
-                balance = payment.payment_amount
-                print(balance)
-        except KeyError:
-            session.close()
-            print("No client id")
+            client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
+            money = content['number_of_pieces'] * piece_price
+            if client.payment_amount < money:
+                raise NoResultFound("Client does not have enough money")
 
-        if order_cost > balance:
-            print(order_cost)
-            print("order_cost > balance")
-            order_accepted(order_id, False)
-        else:
-            try:
-                balance = del_payment(client_id) - order_cost
-                new_payment = Payment(
-                    description="Order payment",
-                    payment_amount=balance,
-                    client_id=client_id
-                )
-                session.add(new_payment)
-                order_accepted(order_id, True)
-                session.commit()
-            except KeyError:
-                session.rollback()
-                session.close()
+            client.payment_amount -= money
+            client.payment_reserved += money
+            session.commit()
+            create_log('Payment reserved', 'info')
+            # order_accepted(content['order_id'], True)
+            content['status'] = status
+            content['type'] = 'PAYMENT'
+            publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
         session.close()
 
-
-def order_accepted(order_id, payed):
-    if payed:
-        publisher_payment.publish_msg("event_exchange", "payment.Accepted", str(order_id))
-    else:
-        publisher_payment.publish_msg("event_exchange", "payment.Denied", str(order_id))
-
-def del_payment(client_id):
-    session = Session()
-    payment = session.query(Payment).filter(Payment.client_id == client_id)
-    if not payment:
+    @staticmethod
+    def payment_reserve_cancelled(channel, method, properties, body):
+        session = Session()
+        content = json.loads(body)
+        try:
+            client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
+            money = content['number_of_pieces'] * piece_price
+            client.payment_amount += money
+            client.payment_reserved -= money
+            session.commit()
+            create_log('Payment cancelled', 'info')
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
         session.close()
-    money = 0
-    for p in payment:
-        print("Usr id: {} money: {}\n".format(p.client_id, p.payment_amount))
-        money += p.payment_amount
-        session.delete(p)
-        session.commit()
-    session.close()
-    return money

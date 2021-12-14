@@ -2,11 +2,12 @@
 import json
 import ssl
 import threading
+
 import pika
-from flask import jsonify
 
 from . import Config, Session, publisher_order
 from .model_order import Order
+from .state_machine import get_coordinator
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
 ssl.match_hostname = lambda cert, hostname: True
@@ -43,29 +44,6 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def status_accepted(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body))
-        order_id = int(body)
-        session = Session()
-        order = session.query(Order).get(order_id)
-        datos = {"number_of_pieces": order.number_of_pieces,
-                 "order_id": order_id}
-        order.status = order.STATUS_CREATED
-        publisher_order.publish_msg("event_exchange", "order.payed", json.dumps(datos))
-        session.commit()
-        session.close()
-
-    @staticmethod
-    def status_denied(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body))
-        order_id = int(body)
-        session = Session()
-        order = session.query(Order).get(order_id)
-        order.status = order.STATUS_CANCELLED
-        session.commit()
-        session.close()
-
-    @staticmethod
     def order_delivered(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body))
         order_id = int(body)
@@ -87,9 +65,23 @@ class ThreadedConsumer:
                     order.pieces_created += 1
                 if order.pieces_created == order.number_of_pieces:
                     order.status = order.STATUS_FINISHED
-                    publisher_order.publish_msg("event_exchange", "order.finished", str(order_id))
+                    publisher_order.publish_msg("sagas_commands", "delivery.update", str(order_id))
                 session.commit()
         except KeyError:
             session.rollback()
             session.close()
         session.close()
+
+    # Sagas callback for Payment
+    @staticmethod
+    def payment_response(ch, method, properties, body):
+        content = json.loads(body)
+        coordinator = get_coordinator()
+        coordinator.process_message(content)
+
+    # Sagas callback for Delivery
+    @staticmethod
+    def delivery_response(ch, method, properties, body):
+        content = json.loads(body)
+        coordinator = get_coordinator()
+        coordinator.process_message(content)

@@ -1,12 +1,13 @@
 from application import create_app
-from application.subscriber_delivery import ThreadedConsumer
-from application.auth import RsaSingleton
 from application import log
+from application.auth import RsaSingleton
+from application.subscriber_delivery import ThreadedConsumer
 
 app = create_app()
 
-ThreadedConsumer('event_exchange', 'order.created', ThreadedConsumer.create_delivery)
-ThreadedConsumer('event_exchange', 'order.finished', ThreadedConsumer.start_producing)
+ThreadedConsumer('sagas_commands', 'delivery.create', ThreadedConsumer.create_delivery)
+ThreadedConsumer('sagas_commands', 'delivery.cancel', ThreadedConsumer.cancel_delivery)
+ThreadedConsumer('sagas_commands', 'delivery.update', ThreadedConsumer.update_delivery)
 
 # request jwt public key
 RsaSingleton.request_public_key()

@@ -1,4 +1,5 @@
 import json
+
 from flask import current_app as app
 from flask import request, jsonify, abort
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
@@ -7,9 +8,10 @@ from . import Session
 from . import publisher_order
 from .auth import RsaSingleton
 from .model_order import Order
-
-
 # Order Routes #########################################################################################################
+from .order_state import OrderState
+from .publisher_order import publish_msg
+from .state_machine import get_coordinator
 
 
 @app.route('/order', methods=['POST'])
@@ -34,11 +36,21 @@ def create_order():
         session.add(new_order)
         session.commit()
 
+        zip = content['zip']
+        address = content['address']
+
         datos = {"number_of_pieces": new_order.number_of_pieces,
                  "client_id": new_order.client_id,
-                 "order_id": new_order.id}
-        publisher_order.publish_msg("event_exchange", "order.created", json.dumps(datos))
+                 "order_id": new_order.id,
+                 "zip": zip,
+                 "address": address}
+
+        coordinator = get_coordinator()
+        order_state = OrderState(datos['order_id'], datos['client_id'], datos['number_of_pieces'])
+        coordinator.order_state_list.append(order_state)
+
         print("\ndatos: {}\njson datos: {} \n".format(datos, json.dumps(datos)))
+        publish_msg("sagas_commands", "payment.reserved", json.dumps(datos))
     except KeyError:
         session.rollback()
         session.close()

@@ -1,10 +1,9 @@
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
+from werkzeug.exceptions import NotFound, UnsupportedMediaType, Unauthorized, ServiceUnavailable
 
 # Delivery Routes ######################################################################################################
 from . import Session
-from . import publisher_delivery
 from .auth import RsaSingleton
 from .model_delivery import Delivery
 
@@ -20,33 +19,6 @@ def init_req():
 
 
 # Delivery Routes ######################################################################################################
-
-
-@app.route('/delivery/confirm/<int:order_id>', methods=['POST'])
-def update_delivery_address(order_id):
-    content, session = init_req()
-
-    jwt_token = get_jwt_from_request()
-    RsaSingleton.check_jwt_any_role(jwt_token)
-
-    delivery = session.query(Delivery).filter_by(order_id=order_id).first()
-    if delivery is None:
-        abort(NotFound.code)
-
-    try:
-        new_address = content['address']
-        delivery.address = new_address
-        session.commit()
-        delivery.status = Delivery.STATUS_DELIVERED
-        publisher_delivery.publish_msg("event_exchange", "delivery.delivered", str(order_id))
-        session.commit()
-    except KeyError:
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    response = jsonify(delivery.as_dict())
-    session.close()
-    return response
 
 
 def get_jwt_from_request():
