@@ -6,10 +6,12 @@ import threading
 import pika
 
 from . import Config, Session, publisher_order
+from .log import create_log
 from .model_order import Order
 from .state_machine import get_coordinator
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
+
 ssl.match_hostname = lambda cert, hostname: True
 
 
@@ -70,6 +72,21 @@ class ThreadedConsumer:
         except KeyError:
             session.rollback()
             session.close()
+        session.close()
+
+    @staticmethod
+    def cancel_order(channel, method, properties, body):
+        print("Order cancel callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+        try:
+            order = session.query(Order).get(content['order_id'])
+            order.status = order.STATUS_CANCELLED
+            session.commit()
+            create_log('Order cancelled', 'info')
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
         session.close()
 
     # Sagas callback for Payment

@@ -80,30 +80,34 @@ class ThreadedConsumer:
             if content['zip'].startswith('01') or content['zip'].startswith('20') or content['zip'].startswith('48'):
                 session.add(new_delivery)
                 session.commit()
+                session.close()
                 create_log('Delivery created', 'info')
+                content['status'] = status
+                content['type'] = 'DELIVERY'
+                publish_msg("sagas_commands", "sagas.delivery", json.dumps(content))
             else:
-                status = Delivery.STATUS_PREPARING
+                session.close()
+                create_log('Delivery cancelled, wrong ZIP code', 'info')
+                content['status'] = False
+                content['type'] = 'PAYMENT'
+                publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
+                publish_msg("sagas_commands", "payment.reserved.denied", json.dumps(content))
         except KeyError:
-            status = Delivery.STATUS_PREPARING
             session.rollback()
-
-        content['status'] = status
-        content['type'] = 'DELIVERY'
-        publish_msg("sagas_commands", "sagas.delivery", json.dumps(content))
-        session.close()
+            session.close()
 
     # Delivery reserve cancel
     @staticmethod
-    def cancel_delivery(ch, method, properties, body):
-        print("Delivery cancel callback", flush=True)
+    def remove_delivery(ch, method, properties, body):
+        print("Remove delivery callback", flush=True)
         session = Session()
         content = json.loads(body)
         try:
             session.query(Delivery).filter(Delivery.order_id == content['order_id']).one().delete()
             session.commit()
-            create_log('Delivery cancelled', 'info')
+            create_log('Delivery removed', 'info')
         except Exception as e:
-            create_log(str(e), 'info')
+            create_log(str(e), 'error')
             session.rollback()
         session.close()
 
@@ -123,5 +127,5 @@ class ThreadedConsumer:
             create_log('Delivery updated', 'info')
         except Exception as e:
             session.rollback()
-            create_log(str(e), 'info')
+            create_log(str(e), 'error')
         session.close()

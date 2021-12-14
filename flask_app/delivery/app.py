@@ -6,7 +6,7 @@ from application.subscriber_delivery import ThreadedConsumer
 app = create_app()
 
 ThreadedConsumer('sagas_commands', 'delivery.create', ThreadedConsumer.create_delivery)
-ThreadedConsumer('sagas_commands', 'delivery.cancel', ThreadedConsumer.cancel_delivery)
+ThreadedConsumer('sagas_commands', 'delivery.remove', ThreadedConsumer.remove_delivery)
 ThreadedConsumer('sagas_commands', 'delivery.update', ThreadedConsumer.update_delivery)
 
 # request jwt public key

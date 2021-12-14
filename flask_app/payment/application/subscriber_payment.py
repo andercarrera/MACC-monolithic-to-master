@@ -58,23 +58,29 @@ class ThreadedConsumer:
             client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
             money = content['number_of_pieces'] * piece_price
             if client.payment_amount < money:
-                raise NoResultFound("Client does not have enough money")
+                raise Exception("Client does not have enough money")
 
             client.payment_amount -= money
             client.payment_reserved += money
             session.commit()
             create_log('Payment reserved', 'info')
-            # order_accepted(content['order_id'], True)
             content['status'] = status
             content['type'] = 'PAYMENT'
             publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
+        except KeyError as e:
+            create_log(str(e), 'error')
+            session.rollback()
         except Exception as e:
             create_log(str(e), 'error')
+            content['status'] = False
+            content['type'] = 'PAYMENT'
+            publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
             session.rollback()
         session.close()
 
     @staticmethod
     def payment_reserve_cancelled(channel, method, properties, body):
+        print("Payment cancel callback", flush=True)
         session = Session()
         content = json.loads(body)
         try:
@@ -84,6 +90,22 @@ class ThreadedConsumer:
             client.payment_reserved -= money
             session.commit()
             create_log('Payment cancelled', 'info')
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
+        session.close()
+
+    @staticmethod
+    def payment_accepted(channel, method, properties, body):
+        print("Payment accepted, removing reserved money callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+        try:
+            client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
+            money = content['number_of_pieces'] * piece_price
+            client.payment_reserved -= money
+            session.commit()
+            create_log('Removed reserved money, accepted payment', 'info')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()

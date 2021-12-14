@@ -6,6 +6,7 @@ from application import log
 app = create_app()
 
 ThreadedConsumer('sagas_commands', 'payment.reserved', ThreadedConsumer.payment_reserved_accepted)
+ThreadedConsumer('sagas_commands', 'payment.accepted', ThreadedConsumer.payment_accepted)
 ThreadedConsumer('sagas_commands', 'payment.reserved.denied', ThreadedConsumer.payment_reserve_cancelled)
 
 # request jwt public key
