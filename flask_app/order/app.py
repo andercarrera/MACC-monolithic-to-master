@@ -6,8 +6,9 @@ from application.subscriber_order import ThreadedConsumer
 app = create_app()
 
 ThreadedConsumer('event_exchange', 'machine.piece_finished', ThreadedConsumer.piece_finished)
-ThreadedConsumer('sagas_commands', 'sagas.payment', ThreadedConsumer.payment_response)
-ThreadedConsumer('sagas_commands', 'sagas.delivery', ThreadedConsumer.delivery_response)
+ThreadedConsumer('sagas_commands', 'sagas.create_order', ThreadedConsumer.sagas_create_order_response)
+ThreadedConsumer('sagas_commands', 'sagas.persist', ThreadedConsumer.persist_state)
+
 
 ThreadedConsumer('sagas_commands', 'order.cancel', ThreadedConsumer.cancel_order)
 

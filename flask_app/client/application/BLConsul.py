@@ -59,7 +59,8 @@ class BLConsul:
     #                 break
     #     return ret_service
 
-    def get_service(self, service_name):
+    @staticmethod
+    def get_service(service_name):
         ret = {
             "Address": None,
             "Port": None

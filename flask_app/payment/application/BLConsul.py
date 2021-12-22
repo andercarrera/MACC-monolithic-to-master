@@ -7,6 +7,7 @@ consul_resolver = dns.resolver.Resolver(configure=False)
 consul_resolver.port = 8600
 consul_resolver.nameservers = [config.CONSUL_IP]
 
+
 class BLConsul:
     __instance = None
     consul = None
@@ -57,7 +58,8 @@ class BLConsul:
     #                 break
     #     return ret_service
 
-    def get_service(self, service_name):
+    @staticmethod
+    def get_service(service_name):
         ret = {
             "Address": None,
             "Port": None

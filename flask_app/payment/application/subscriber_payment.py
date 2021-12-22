@@ -3,7 +3,6 @@ import ssl
 import threading
 
 import pika
-from sqlalchemy.orm.exc import NoResultFound
 
 from . import Session, Config
 from .log import create_log
@@ -52,7 +51,6 @@ class ThreadedConsumer:
         print("Payment reserve callback", flush=True)
         session = Session()
         content = json.loads(body)
-        status = True
 
         try:
             client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
@@ -64,9 +62,9 @@ class ThreadedConsumer:
             client.payment_reserved += money
             session.commit()
             create_log('Payment reserved', 'info')
-            content['status'] = status
+            content['status'] = True
             content['type'] = 'PAYMENT'
-            publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
+            publish_msg("sagas_commands", "sagas.create_order", json.dumps(content))
         except KeyError as e:
             create_log(str(e), 'error')
             session.rollback()
@@ -74,7 +72,8 @@ class ThreadedConsumer:
             create_log(str(e), 'error')
             content['status'] = False
             content['type'] = 'PAYMENT'
-            publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
+            content['description'] = "Not enough credit"
+            publish_msg("sagas_commands", "sagas.create_order", json.dumps(content))
             session.rollback()
         session.close()
 
@@ -89,7 +88,8 @@ class ThreadedConsumer:
             client.payment_amount += money
             client.payment_reserved -= money
             session.commit()
-            create_log('Payment cancelled', 'saga')
+            content['description'] = "Invalid ZIP code"
+            publish_msg("sagas_commands", "order.cancel", json.dumps(content))
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
@@ -105,7 +105,6 @@ class ThreadedConsumer:
             money = content['number_of_pieces'] * piece_price
             client.payment_reserved -= money
             session.commit()
-            create_log('Removed reserved money, accepted payment', 'saga')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()

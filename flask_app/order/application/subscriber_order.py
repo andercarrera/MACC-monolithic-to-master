@@ -7,7 +7,8 @@ import pika
 
 from . import Config, Session, publisher_order
 from .log import create_log
-from .model_order import Order
+from .model_order import Order, Saga
+from .publisher_order import publish_msg
 from .state_machine import get_coordinator
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
@@ -83,22 +84,38 @@ class ThreadedConsumer:
             order = session.query(Order).get(content['order_id'])
             order.status = order.STATUS_CANCELLED
             session.commit()
-            create_log('Order cancelled', 'saga')
+            content = {"order_id": content['order_id'],
+                       "state_machine": Saga.SAGAS_CREATE_ORDER,
+                       "status": "Order rejected",
+                       "description": content['description']}
+            publish_msg("sagas_commands", "sagas.persist", json.dumps(content))
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
         session.close()
 
-    # Sagas callback for Payment
+    # Sagas callback
     @staticmethod
-    def payment_response(ch, method, properties, body):
+    def sagas_create_order_response(ch, method, properties, body):
         content = json.loads(body)
         coordinator = get_coordinator()
         coordinator.process_message(content)
 
-    # Sagas callback for Delivery
     @staticmethod
-    def delivery_response(ch, method, properties, body):
+    def persist_state(ch, method, properties, body):
+        session = Session()
         content = json.loads(body)
-        coordinator = get_coordinator()
-        coordinator.process_message(content)
+        try:
+            new_state = Saga(
+                order_id=content['order_id'],
+                state_machine=content['state_machine'],
+                status=content['status'],
+                description=content['description']
+            )
+            session.add(new_state)
+            session.commit()
+            create_log('SAGAS: ' + new_state.state_machine + ' ' + new_state.status, 'sagas')
+        except KeyError:
+            session.rollback()
+            session.close()
+        session.close()

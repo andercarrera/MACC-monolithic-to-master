@@ -69,7 +69,6 @@ class ThreadedConsumer:
         print("Delivery create body ", flush=True)
         print(body, flush=True)
         content = json.loads(body)
-        status = True
 
         try:
             new_delivery = Delivery(
@@ -81,17 +80,16 @@ class ThreadedConsumer:
                 session.add(new_delivery)
                 session.commit()
                 session.close()
-                create_log('Delivery created', 'saga')
-                content['status'] = status
+                content['status'] = True
                 content['type'] = 'DELIVERY'
-                publish_msg("sagas_commands", "sagas.delivery", json.dumps(content))
             else:
                 session.close()
                 create_log('Delivery cancelled, wrong ZIP code', 'info')
                 content['status'] = False
-                content['type'] = 'PAYMENT'
-                publish_msg("sagas_commands", "sagas.payment", json.dumps(content))
-                publish_msg("sagas_commands", "payment.reserved.denied", json.dumps(content))
+                content['type'] = 'DELIVERY'
+
+            publish_msg("sagas_commands", "sagas.create_order", json.dumps(content))
+
         except KeyError:
             session.rollback()
             session.close()
@@ -105,7 +103,6 @@ class ThreadedConsumer:
         try:
             session.query(Delivery).filter(Delivery.order_id == content['order_id']).one().delete()
             session.commit()
-            create_log('Delivery removed', 'saga')
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()

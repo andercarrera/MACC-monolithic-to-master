@@ -7,9 +7,9 @@ from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unau
 from . import Session
 from . import publisher_order
 from .auth import RsaSingleton
-from .model_order import Order
+from .model_order import Order, Saga
 # Order Routes #########################################################################################################
-from .order_state import OrderState
+from .sagas_create_order import CreateOrderState
 from .publisher_order import publish_msg
 from .state_machine import get_coordinator
 
@@ -46,7 +46,7 @@ def create_order():
                  "address": address}
 
         coordinator = get_coordinator()
-        order_state = OrderState(datos['order_id'], datos['client_id'], datos['number_of_pieces'])
+        order_state = CreateOrderState(datos['order_id'], datos['client_id'], datos['number_of_pieces'])
         coordinator.order_state_list.append(order_state)
 
         print("\ndatos: {}\njson datos: {} \n".format(datos, json.dumps(datos)))
@@ -124,3 +124,18 @@ def health_check():
         abort(ServiceUnavailable.code)
 
     return 'OK', 200
+
+
+# Sagas ##################################################################################################
+@app.route('/order/saga', methods=['GET'])
+@app.route('/order/sagas', methods=['GET'])
+def view_sagas():
+    session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt)
+
+    sagas = session.query(Saga).all()
+    response = jsonify(Saga.list_as_dict(sagas))
+    session.close()
+    return response

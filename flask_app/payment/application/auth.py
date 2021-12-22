@@ -7,7 +7,8 @@ import requests
 from jwt import InvalidSignatureError
 from werkzeug.exceptions import abort, Unauthorized, Forbidden
 
-from . import Config, publisher_payment, BLConsul
+from . import Config, BLConsul
+
 
 class RsaSingleton(object):
     public_key = None

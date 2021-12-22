@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, TEXT
+from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
@@ -41,3 +41,15 @@ class Order(BaseModel):
     pieces_created = Column(Integer, default=0)
     description = Column(TEXT, nullable=False, default="No description")
     status = Column(String(256), nullable=False, default="created")
+
+
+class Saga(BaseModel):
+    SAGAS_CREATE_ORDER = "Create Order"
+    SAGAS_CANCEL_ORDER = "Cancel Order"
+
+    __tablename__ = "sagas_order"
+    id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, ForeignKey('manufacturing_order.id'))
+    state_machine = Column(TEXT, nullable=False)
+    status = Column(TEXT, nullable=False)
+    description = Column(TEXT, nullable=True)

@@ -1,10 +1,8 @@
 # !/usr/bin/env python
 import ssl
+import threading
 
 import pika
-import threading
-import requests
-from flask import jsonify
 
 from . import Session, Config
 from .model_logs import Log
@@ -43,7 +41,7 @@ class ThreadedConsumer:
         thread = threading.Thread(target=channel.start_consuming)
         thread.start()
 
-    def get_logs(ch, method, properties, body):
+    def get_logs(self, method, properties, body):
         print("Log callback", flush=True)
         print(" [x] %r:%r" % (method.routing_key, body), flush=True)
         session = Session()

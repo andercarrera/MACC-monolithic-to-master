@@ -11,10 +11,9 @@ class Coordinator(object):
         order_state = self.__get_order_from_list(message['order_id'])
         if message['type'] == 'PAYMENT':
             order_state.process_payment(message)
-            if order_state.state.get_state() == 'PENDING DELIVERY':
+            if order_state.state.get_state() == 'Pending delivery':
                 publish_msg("sagas_commands", "delivery.create", json.dumps(message))
             if order_state.state.get_state() == 'CANCELLED PAYMENT':
-                publish_msg("sagas_commands", "delivery.remove", json.dumps(message))
                 publish_msg("sagas_commands", "order.cancel", json.dumps(message))
         if message['type'] == 'DELIVERY':
             order_state.process_delivery(message)
