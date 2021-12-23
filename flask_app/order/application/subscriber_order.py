@@ -88,7 +88,7 @@ class ThreadedConsumer:
                        "state_machine": Saga.SAGAS_CREATE_ORDER,
                        "status": "Order rejected",
                        "description": content['description']}
-            publish_msg("sagas_commands", "sagas.persist", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
@@ -99,7 +99,7 @@ class ThreadedConsumer:
     def sagas_create_order_response(ch, method, properties, body):
         content = json.loads(body)
         coordinator = get_coordinator()
-        coordinator.process_message(content)
+        coordinator.process_create_order(content)
 
     @staticmethod
     def persist_state(ch, method, properties, body):

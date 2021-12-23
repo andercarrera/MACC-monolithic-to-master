@@ -64,7 +64,7 @@ class ThreadedConsumer:
             create_log('Payment reserved', 'info')
             content['status'] = True
             content['type'] = 'PAYMENT'
-            publish_msg("sagas_commands", "sagas.create_order", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_process.create_order", json.dumps(content))
         except KeyError as e:
             create_log(str(e), 'error')
             session.rollback()
@@ -73,7 +73,7 @@ class ThreadedConsumer:
             content['status'] = False
             content['type'] = 'PAYMENT'
             content['description'] = "Not enough credit"
-            publish_msg("sagas_commands", "sagas.create_order", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_process.create_order", json.dumps(content))
             session.rollback()
         session.close()
 

@@ -88,7 +88,7 @@ class ThreadedConsumer:
                 content['status'] = False
                 content['type'] = 'DELIVERY'
 
-            publish_msg("sagas_commands", "sagas.create_order", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_process.create_order", json.dumps(content))
 
         except KeyError:
             session.rollback()

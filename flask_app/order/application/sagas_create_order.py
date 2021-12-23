@@ -14,7 +14,7 @@ class CreateOrderState(object):
                    "state_machine": Saga.SAGAS_CREATE_ORDER,
                    "status": self.state.get_state(),
                    "description": "Order created"}
-        publish_msg("sagas_commands", "sagas.persist", json.dumps(content))
+        publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
 
     def process_payment(self, message):
         if message['status']:
@@ -24,7 +24,7 @@ class CreateOrderState(object):
                        "state_machine": Saga.SAGAS_CREATE_ORDER,
                        "status": self.state.get_state(),
                        "description": "Credit reserved"}
-            publish_msg("sagas_commands", "sagas.persist", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
         else:
             self.state = cancelled_payment()
 
@@ -36,7 +36,7 @@ class CreateOrderState(object):
                        "state_machine": Saga.SAGAS_CREATE_ORDER,
                        "status": "Order accepted",
                        "description": "Correct ZIP code"}
-            publish_msg("sagas_commands", "sagas.persist", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
         else:
             self.state = cancelled_delivery()
 
@@ -44,7 +44,7 @@ class CreateOrderState(object):
                        "state_machine": Saga.SAGAS_CREATE_ORDER,
                        "status": "Release reserved credit",
                        "description": "Invalid ZIP code"}
-            publish_msg("sagas_commands", "sagas.persist", json.dumps(content))
+            publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
 
 
 class MachineState(object):

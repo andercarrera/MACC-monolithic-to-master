@@ -7,7 +7,7 @@ class Coordinator(object):
     def __init__(self):
         self.order_state_list = list()
 
-    def process_message(self, message):
+    def process_create_order(self, message):
         order_state = self.__get_order_from_list(message['order_id'])
         if message['type'] == 'PAYMENT':
             order_state.process_payment(message)
