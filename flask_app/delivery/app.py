@@ -7,7 +7,7 @@ app = create_app()
 
 ThreadedConsumer('sagas_commands', 'delivery.create', ThreadedConsumer.create_delivery)
 ThreadedConsumer('sagas_commands', 'delivery.remove', ThreadedConsumer.remove_delivery)
-ThreadedConsumer('sagas_commands', 'delivery.update', ThreadedConsumer.update_delivery)
+ThreadedConsumer('sagas_commands', 'delivery.delivered', ThreadedConsumer.delivery_delivered)
 
 # request jwt public key
 RsaSingleton.request_public_key()

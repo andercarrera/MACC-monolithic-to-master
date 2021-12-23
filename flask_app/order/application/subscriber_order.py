@@ -4,8 +4,10 @@ import ssl
 import threading
 
 import pika
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.exceptions import abort, NotFound
 
-from . import Config, Session, publisher_order
+from . import Config, Session
 from .log import create_log
 from .model_order import Order, Saga
 from .publisher_order import publish_msg
@@ -47,16 +49,6 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def order_delivered(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body))
-        order_id = int(body)
-        session = Session()
-        order = session.query(Order).get(order_id)
-        order.status = Order.STATUS_DELIVERED
-        session.commit()
-        Session.close()
-
-    @staticmethod
     def piece_finished(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body))
         order_id = int(body)
@@ -67,9 +59,10 @@ class ThreadedConsumer:
                 if order.pieces_created < order.number_of_pieces:
                     order.pieces_created += 1
                 if order.pieces_created == order.number_of_pieces:
-                    order.status = order.STATUS_FINISHED
-                    publisher_order.publish_msg("sagas_commands", "delivery.update", str(order_id))
+                    order.status = order.STATUS_ACCEPTED
                 session.commit()
+        except NoResultFound:
+            abort(NotFound.code, "Order not found for given order id")
         except KeyError:
             session.rollback()
             session.close()
@@ -92,6 +85,23 @@ class ThreadedConsumer:
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
+        session.close()
+
+    @staticmethod
+    def order_preparing(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+        content = json.loads(body)
+        order_id = content['order_id']
+        session = Session()
+        try:
+            order = session.query(Order).get(order_id)
+            order.status = order.STATUS_PREPARING
+            session.commit()
+        except NoResultFound:
+            abort(NotFound.code, "Order not found for given order id")
+        except KeyError:
+            session.rollback()
+            session.close()
         session.close()
 
     # Sagas callback

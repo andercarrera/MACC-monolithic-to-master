@@ -9,7 +9,7 @@ ThreadedConsumer('event_exchange', 'machine.piece_finished', ThreadedConsumer.pi
 ThreadedConsumer('sagas_response_exchange', 'sagas_process.create_order', ThreadedConsumer.sagas_create_order_response)
 ThreadedConsumer('sagas_response_exchange', 'sagas_persist.*', ThreadedConsumer.persist_state)
 
-
+ThreadedConsumer('sagas_commands', 'order.paid', ThreadedConsumer.order_preparing)
 ThreadedConsumer('sagas_commands', 'order.cancel', ThreadedConsumer.cancel_order)
 
 # request jwt public key

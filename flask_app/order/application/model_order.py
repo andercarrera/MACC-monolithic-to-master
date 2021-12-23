@@ -30,9 +30,10 @@ class BaseModel(Base):
 class Order(BaseModel):
     STATUS_WAITING_FOR_PAYMENT = "waiting"
     STATUS_CREATED = "created"
-    STATUS_FINISHED = "finished"
+    STATUS_ACCEPTED = "accepted"
     STATUS_DELIVERED = "delivered"
     STATUS_CANCELLED = "cancelled"
+    STATUS_PREPARING = "preparing"
 
     __tablename__ = "manufacturing_order"
     id = Column(Integer, primary_key=True)
@@ -40,7 +41,7 @@ class Order(BaseModel):
     number_of_pieces = Column(Integer, nullable=False)
     pieces_created = Column(Integer, default=0)
     description = Column(TEXT, nullable=False, default="No description")
-    status = Column(String(256), nullable=False, default="created")
+    status = Column(String(256), nullable=False, default=STATUS_CREATED)
 
 
 class Saga(BaseModel):

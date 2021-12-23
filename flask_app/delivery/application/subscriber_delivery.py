@@ -109,7 +109,7 @@ class ThreadedConsumer:
         session.close()
 
     @staticmethod
-    def update_delivery(ch, method, properties, body):
+    def delivery_delivered(ch, method, properties, body):
         print("Delivery update callback", flush=True)
         session = Session()
         order_id = int(body)
@@ -121,7 +121,7 @@ class ThreadedConsumer:
             delivery = session.query(Delivery).filter(Delivery.order_id == new_delivery.order_id).one()
             delivery.status = Delivery.STATUS_DELIVERED
             session.commit()
-            create_log('Delivery updated', 'info')
+            create_log('Delivery delivered', 'info')
         except Exception as e:
             session.rollback()
             create_log(str(e), 'error')

@@ -2,15 +2,16 @@ import json
 
 from flask import current_app as app
 from flask import request, jsonify, abort
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unauthorized, ServiceUnavailable
 
 from . import Session
 from . import publisher_order
 from .auth import RsaSingleton
 from .model_order import Order, Saga
+from .publisher_order import publish_msg
 # Order Routes #########################################################################################################
 from .sagas_create_order import CreateOrderState
-from .publisher_order import publish_msg
 from .state_machine import get_coordinator
 
 
@@ -97,6 +98,31 @@ def view_order(order_id):
     return response
 
 
+@app.route('/order/deliver/<int:order_id>', methods=['POST'])
+def deliver_order(order_id):
+    session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_admin(jwt)
+
+    response = None
+    try:
+        order = session.query(Order).get(order_id)
+        order.status = Order.STATUS_DELIVERED
+        session.commit()
+        response = jsonify(order.as_dict())
+    except NoResultFound:
+        abort(NotFound.code, "Order not found for given order id")
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
+
+    publisher_order.publish_msg("sagas_commands", "delivery.delivered", str(order_id))
+    session.close()
+    return response
+
+
 @app.route('/order/<int:order_id>', methods=['DELETE'])
 def delete_order(order_id):
     session = Session()
@@ -104,13 +130,29 @@ def delete_order(order_id):
     jwt = get_jwt_from_request()
     RsaSingleton.check_jwt_admin(jwt)
 
-    order = session.query(Order).get(order_id)
-    if not order:
+    response = None
+    try:
+        order = session.query(Order).get(order_id)
+        if not order:
+            abort(NotFound.code, "Order not found for given order id")
+        if order.status == Order.STATUS_CANCELLED:
+            abort(BadRequest.code, "Order already cancelled")
+        if order.status == Order.STATUS_PREPARING:
+            abort(BadRequest.code, "Order still in process, can't be cancelled")
+        if order.status == Order.STATUS_DELIVERED:
+            abort(BadRequest.code, "Order already delivered, can't be cancelled")
+        if order.status == Order.STATUS_ACCEPTED:
+            publisher_order.publish_msg("event_exchange", "order.deleted", str(order.id))
+            session.delete(order)
+            session.commit()
+            response = "The order {} was successfully cancelled".format(order.id), 200
+    except NoResultFound:
         abort(NotFound.code, "Order not found for given order id")
-    publisher_order.publish_msg("event_exchange", "order.deleted", str(order.id))
-    session.delete(order)
-    session.commit()
-    response = jsonify(order.as_dict())
+    except KeyError:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
+
     session.close()
     return response
 
