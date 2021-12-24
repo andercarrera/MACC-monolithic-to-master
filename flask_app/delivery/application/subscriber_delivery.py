@@ -46,7 +46,7 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def start_producing(channel, method, properties, body):
+    def delivery_ready(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body), flush=True)
         order_id = int(body)
         session = Session()
@@ -110,7 +110,7 @@ class ThreadedConsumer:
 
     @staticmethod
     def delivery_delivered(ch, method, properties, body):
-        print("Delivery update callback", flush=True)
+        print("Delivery delivered callback", flush=True)
         session = Session()
         order_id = int(body)
         try:
@@ -125,4 +125,25 @@ class ThreadedConsumer:
         except Exception as e:
             session.rollback()
             create_log(str(e), 'error')
+        session.close()
+
+    @staticmethod
+    def cancel_delivery(ch, method, properties, body):
+        print("Delivery cancel callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+        try:
+            new_delivery = Delivery(
+                order_id=content['order_id'],
+                status=Delivery.STATUS_CANCELLED,
+            )
+            delivery = session.query(Delivery).filter(Delivery.order_id == new_delivery.order_id).one()
+            delivery.status = Delivery.STATUS_CANCELLED
+            session.commit()
+            create_log('Delivery cancelled', 'info')
+        except Exception as e:
+            session.rollback()
+            create_log(str(e), 'error')
+        content['type'] = 'PAYMENT'
+        publish_msg("sagas_response_exchange", "sagas_process.cancel_order", json.dumps(content))
         session.close()

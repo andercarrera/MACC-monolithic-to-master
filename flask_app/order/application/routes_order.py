@@ -11,6 +11,7 @@ from .auth import RsaSingleton
 from .model_order import Order, Saga
 from .publisher_order import publish_msg
 # Order Routes #########################################################################################################
+from .sagas_cancel_order import CancelOrderState
 from .sagas_create_order import CreateOrderState
 from .state_machine import get_coordinator
 
@@ -123,7 +124,7 @@ def deliver_order(order_id):
     return response
 
 
-@app.route('/order/<int:order_id>', methods=['DELETE'])
+@app.route('/order/cancel/<int:order_id>', methods=['POST'])
 def delete_order(order_id):
     session = Session()
 
@@ -142,9 +143,17 @@ def delete_order(order_id):
         if order.status == Order.STATUS_DELIVERED:
             abort(BadRequest.code, "Order already delivered, can't be cancelled")
         if order.status == Order.STATUS_ACCEPTED:
-            publisher_order.publish_msg("event_exchange", "order.deleted", str(order.id))
-            session.delete(order)
-            session.commit()
+            coordinator = get_coordinator()
+            order_state = CancelOrderState(order_id)
+            coordinator.order_state_list.append(order_state)
+
+            content = {"order_id": order_id,
+                       "client_id": order.client_id,
+                       "number_of_pieces": order.number_of_pieces,
+                       "type": 'DELIVERY',
+                       }
+            publish_msg("sagas_response_exchange", "sagas_process.cancel_order", json.dumps(content))
+
             response = "The order {} was successfully cancelled".format(order.id), 200
     except NoResultFound:
         abort(NotFound.code, "Order not found for given order id")

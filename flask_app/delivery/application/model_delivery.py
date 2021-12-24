@@ -29,8 +29,9 @@ class BaseModel(Base):
 
 class Delivery(BaseModel):
     STATUS_PREPARING = "preparing"
-    STATUS_READY = "ready"
+    STATUS_READY = "ready for delivery"
     STATUS_DELIVERED = "delivered"
+    STATUS_CANCELLED = "cancelled"
 
     __tablename__ = "delivery"
     id = Column(Integer, primary_key=True)

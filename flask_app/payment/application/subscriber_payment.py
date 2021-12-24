@@ -89,7 +89,7 @@ class ThreadedConsumer:
             client.payment_reserved -= money
             session.commit()
             content['description'] = "Invalid ZIP code"
-            publish_msg("sagas_commands", "order.cancel", json.dumps(content))
+            publish_msg("sagas_commands", "order.reject", json.dumps(content))
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
@@ -108,4 +108,23 @@ class ThreadedConsumer:
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
+        session.close()
+
+    @staticmethod
+    def payment_refund(channel, method, properties, body):
+        print("Payment refund callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+        try:
+            client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
+            money = content['number_of_pieces'] * piece_price
+            client.payment_amount += money
+            session.commit()
+            content['description'] = None
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
+
+        content['type'] = 'ORDER'
+        publish_msg("sagas_response_exchange", "sagas_process.cancel_order", json.dumps(content))
         session.close()

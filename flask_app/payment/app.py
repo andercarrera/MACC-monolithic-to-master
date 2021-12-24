@@ -8,6 +8,7 @@ app = create_app()
 ThreadedConsumer('sagas_commands', 'payment.reserved', ThreadedConsumer.payment_reserved_accepted)
 ThreadedConsumer('sagas_commands', 'payment.accepted', ThreadedConsumer.payment_accepted)
 ThreadedConsumer('sagas_commands', 'payment.reserved.denied', ThreadedConsumer.payment_reserve_cancelled)
+ThreadedConsumer('sagas_commands', 'payment.refund', ThreadedConsumer.payment_refund)
 
 # request jwt public key
 RsaSingleton.request_public_key()

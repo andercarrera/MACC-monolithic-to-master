@@ -60,12 +60,33 @@ class ThreadedConsumer:
                     order.pieces_created += 1
                 if order.pieces_created == order.number_of_pieces:
                     order.status = order.STATUS_ACCEPTED
+                    publish_msg("sagas_commands", "delivery.ready", body)
                 session.commit()
         except NoResultFound:
             abort(NotFound.code, "Order not found for given order id")
         except KeyError:
             session.rollback()
             session.close()
+        session.close()
+
+    @staticmethod
+    def reject_order(channel, method, properties, body):
+        print("Order cancel callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+        try:
+            order = session.query(Order).get(content['order_id'])
+            order.status = order.STATUS_CANCELLED
+            session.commit()
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
+
+        content = {"order_id": content['order_id'],
+                   "state_machine": Saga.SAGAS_CREATE_ORDER,
+                   "status": "Order rejected",
+                   "description": content['description']}
+        publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
         session.close()
 
     @staticmethod
@@ -77,14 +98,15 @@ class ThreadedConsumer:
             order = session.query(Order).get(content['order_id'])
             order.status = order.STATUS_CANCELLED
             session.commit()
-            content = {"order_id": content['order_id'],
-                       "state_machine": Saga.SAGAS_CREATE_ORDER,
-                       "status": "Order rejected",
-                       "description": content['description']}
-            publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
+
+        content = {"order_id": content['order_id'],
+                   "state_machine": Saga.SAGAS_CANCEL_ORDER,
+                   "status": "Order cancelled",
+                   "description": None}
+        publish_msg("sagas_response_exchange", "sagas_persist.create_order", json.dumps(content))
         session.close()
 
     @staticmethod
@@ -110,6 +132,12 @@ class ThreadedConsumer:
         content = json.loads(body)
         coordinator = get_coordinator()
         coordinator.process_create_order(content)
+
+    @staticmethod
+    def sagas_cancel_order_response(ch, method, properties, body):
+        content = json.loads(body)
+        coordinator = get_coordinator()
+        coordinator.process_cancel_order(content)
 
     @staticmethod
     def persist_state(ch, method, properties, body):
