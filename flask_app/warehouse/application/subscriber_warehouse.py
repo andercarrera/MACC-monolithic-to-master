@@ -51,13 +51,15 @@ class ThreadedConsumer:
         print('New order warehouse callback', flush=True)
         content = json.loads(body)
         session = Session()
+
+        order_id = content['order_id']
         try:
             new_order = Order(
-                id=content['order_id'],
+                id=order_id,
                 client_id=content['client_id'],
                 number_of_pieces=content['number_of_pieces'],
                 pieces_created=0,
-                status=Order.STATUS_ACCEPTED
+                status=Order.STATUS_PREPARING
             )
             print(new_order.as_dict(), flush=True)
             session.add(new_order)
@@ -65,13 +67,47 @@ class ThreadedConsumer:
 
             number_of_pieces = content['number_of_pieces']
 
-            for i in range(number_of_pieces):
-                publish_round_robin_msg("event_exchange", "machine.produce_piece", str(content['order_id']))
+            warehouse_pieces = session.query(Piece).filter(Piece.order_id == None).all()
+            print("warehouse Pieces:", flush=True)
+            print(warehouse_pieces, flush=True)
+
+            pieces_left_to_produce = number_of_pieces - len(warehouse_pieces)
+
+            print("pieces_left_to_produce", flush=True)
+            print(pieces_left_to_produce, flush=True)
+
+            pieces_to_take = ThreadedConsumer.calculate_pieces_to_take_from_warehouse(number_of_pieces,
+                                                                                      warehouse_pieces)
+
+            order = session.query(Order).get(order_id)
+            for warehouse_piece in range(pieces_to_take):
+                piece = session.query(Piece).filter(Piece.order_id == None).first()
+                piece.order_id = order_id
+                order.pieces_created += 1
+                session.commit()
+
+            if pieces_left_to_produce > 0:
+                for i in range(pieces_left_to_produce):
+                    publish_round_robin_msg("event_exchange", "machine.produce_piece", str(content['order_id']))
+            else:
+                order.status = order.STATUS_ACCEPTED
+                publish_msg("event_exchange", "order.accepted", str(order_id))
+                publish_msg("event_exchange", "delivery.ready", str(order_id))
+                session.commit()
+
         except KeyError as e:
             log.create_log(e, 'error')
             session.rollback()
             session.close()
         session.close()
+
+    @staticmethod
+    def calculate_pieces_to_take_from_warehouse(number_of_pieces, warehouse_pieces):
+        if len(warehouse_pieces) >= number_of_pieces:
+            pieces_to_take = number_of_pieces
+        else:
+            pieces_to_take = len(warehouse_pieces)
+        return pieces_to_take
 
     @staticmethod
     def piece_finished(channel, method, properties, body):
@@ -149,6 +185,3 @@ class ThreadedConsumer:
             create_log(str(e), 'error')
             session.rollback()
         session.close()
-
-    # TODO: When a new order is created first check if there are any pieces that can be used for the new order
-    #  instead of producing new ones
