@@ -7,9 +7,9 @@ app = create_app()
 
 ThreadedConsumer('sagas_commands', 'delivery.create', ThreadedConsumer.create_delivery)
 ThreadedConsumer('sagas_commands', 'delivery.remove', ThreadedConsumer.remove_delivery)
-ThreadedConsumer('sagas_commands', 'delivery.delivered', ThreadedConsumer.delivery_delivered)
+ThreadedConsumer('event_exchange', 'delivery.delivered', ThreadedConsumer.delivery_delivered)
 ThreadedConsumer('sagas_commands', 'delivery.cancel', ThreadedConsumer.cancel_delivery)
-ThreadedConsumer('sagas_commands', 'delivery.ready', ThreadedConsumer.delivery_ready)
+ThreadedConsumer('event_exchange', 'delivery.ready', ThreadedConsumer.delivery_ready)
 
 
 # request jwt public key

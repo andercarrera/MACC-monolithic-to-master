@@ -49,27 +49,6 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def piece_finished(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body))
-        order_id = int(body)
-        session = Session()
-        try:
-            order = session.query(Order).get(order_id)
-            if order:
-                if order.pieces_created < order.number_of_pieces:
-                    order.pieces_created += 1
-                if order.pieces_created == order.number_of_pieces:
-                    order.status = order.STATUS_ACCEPTED
-                    publish_msg("sagas_commands", "delivery.ready", body)
-                session.commit()
-        except NoResultFound:
-            abort(NotFound.code, "Order not found for given order id")
-        except KeyError:
-            session.rollback()
-            session.close()
-        session.close()
-
-    @staticmethod
     def reject_order(channel, method, properties, body):
         print("Order cancel callback", flush=True)
         session = Session()
@@ -118,6 +97,22 @@ class ThreadedConsumer:
         try:
             order = session.query(Order).get(order_id)
             order.status = order.STATUS_PREPARING
+            session.commit()
+        except NoResultFound:
+            abort(NotFound.code, "Order not found for given order id")
+        except KeyError:
+            session.rollback()
+            session.close()
+        session.close()
+
+    @staticmethod
+    def order_accepted(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+        order_id = int(body)
+        session = Session()
+        try:
+            order = session.query(Order).get(order_id)
+            order.status = order.STATUS_ACCEPTED
             session.commit()
         except NoResultFound:
             abort(NotFound.code, "Order not found for given order id")

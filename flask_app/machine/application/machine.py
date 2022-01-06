@@ -1,11 +1,14 @@
-from random import randint
-from time import sleep
+import json
 from collections import deque
-from .model_machine import Piece
+from random import randint
 from threading import Thread, Lock, Event
+from time import sleep
+
 import sqlalchemy
-from . import publisher_machine
+
 from . import Session
+from . import publisher_machine
+from .model_machine import Piece
 
 
 class Machine(Thread):
@@ -56,10 +59,10 @@ class Machine(Thread):
 
     def create_piece(self):
         # Get piece from queue
-        piece_ref = self.queue.popleft()
+        piece_id = self.queue.popleft()
 
         # Machine and piece status updated during manufacturing
-        self.working_piece = self.thread_session.query(Piece).get(piece_ref)
+        self.working_piece = self.thread_session.query(Piece).get(piece_id)
 
         # Machine and piece status updated before manufacturing
         self.working_piece_to_manufacturing()
@@ -91,13 +94,13 @@ class Machine(Thread):
             self.add_piece_to_queue(piece)
 
     def add_piece_to_queue(self, piece):
-        self.queue.append(piece.ref)
+        self.queue.append(piece.id)
         piece.status = Piece.STATUS_QUEUED
-        print("Adding piece to queue: {}".format(piece.ref))
+        print("Adding piece to queue: {}".format(piece.id), flush=True)
         self.queue_not_empty_event.set()
 
     def remove_pieces_from_queue(self, pieces):
         for piece in pieces:
             if piece.status == Piece.STATUS_QUEUED:
-                self.queue.remove(piece.ref)
+                self.queue.remove(piece.id)
                 piece.status = Piece.STATUS_CANCELLED

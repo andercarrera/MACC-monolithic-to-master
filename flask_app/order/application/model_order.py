@@ -39,7 +39,6 @@ class Order(BaseModel):
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, nullable=False)
     number_of_pieces = Column(Integer, nullable=False)
-    pieces_created = Column(Integer, default=0)
     description = Column(TEXT, nullable=False, default="No description")
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
 

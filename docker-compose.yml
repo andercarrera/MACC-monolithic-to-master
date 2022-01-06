@@ -193,6 +193,38 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${LOGS_IP}'
+  warehouse:
+    build: ./flask_app/warehouse
+    expose:
+      - '${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/warehouse:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
+    environment:
+      GUNICORN_PORT: '${GUNICORN_PORT}'
+      #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
+      SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
+      SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
+      CLIENT_IP: '${CLIENT_IP}'
+      DELIVERY_IP: '${DELIVERY_IP}'
+      MACHINE_IP: '${MACHINE_IP}'
+      ORDER_IP: '${ORDER_IP}'
+      PAYMENT_IP: '${PAYMENT_IP}'
+      RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'warehouse'
+      SERVICE_ID: 'warehouse'
+      CONSUL_HOST: '${CONSUL_IP}'
+    depends_on:
+      - consul
+    networks:
+      lb7_network:
+        ipv4_address: '${WAREHOUSE_IP}'
   rabbitmq:
     image: rabbitmq:3.8-management
     environment:

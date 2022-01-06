@@ -32,7 +32,6 @@ def create_order():
             description=content['description'],
             client_id=content['client_id'],
             number_of_pieces=content['number_of_pieces'],
-            pieces_created=0,
             status=Order.STATUS_WAITING_FOR_PAYMENT
         )
         session.add(new_order)
@@ -119,7 +118,7 @@ def deliver_order(order_id):
         session.close()
         abort(BadRequest.code)
 
-    publisher_order.publish_msg("sagas_commands", "delivery.delivered", str(order_id))
+    publisher_order.publish_msg("event_exchange", "delivery.delivered", str(order_id))
     session.close()
     return response
 

@@ -27,15 +27,24 @@ class BaseModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Piece(BaseModel):
-    STATUS_CREATED = "Created"
-    STATUS_CANCELLED = "Cancelled"
-    STATUS_QUEUED = "Queued"
-    STATUS_MANUFACTURING = "Manufacturing"
-    STATUS_MANUFACTURED = "Manufactured"
+class Order(BaseModel):
+    STATUS_WAITING_FOR_PAYMENT = "waiting"
+    STATUS_CREATED = "created"
+    STATUS_ACCEPTED = "accepted"
+    STATUS_DELIVERED = "delivered"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_PREPARING = "preparing"
 
+    __tablename__ = "manufacturing_order"
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, nullable=False)
+    number_of_pieces = Column(Integer, nullable=False)
+    pieces_created = Column(Integer, default=0)
+    status = Column(String(256), nullable=False, default=STATUS_CREATED)
+
+
+class Piece(BaseModel):
     __tablename__ = "piece"
     id = Column(Integer, primary_key=True)
     manufacturing_date = Column(DateTime(timezone=True), server_default=None)
-    status = Column(String(256), default=STATUS_QUEUED)
-    order_id = Column(Integer, nullable=False)
+    order_id = Column(Integer, nullable=True)

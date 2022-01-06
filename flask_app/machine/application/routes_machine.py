@@ -24,8 +24,8 @@ def get_jwt_from_request():
 # Machine Routes #######################################################################################################
 
 
-@app.route('/piece', methods=['GET'])
-@app.route('/pieces', methods=['GET'])
+@app.route('/machine/piece', methods=['GET'])
+@app.route('/machine/pieces', methods=['GET'])
 def view_pieces():
     session = Session()
 
@@ -42,7 +42,7 @@ def view_pieces():
     return response
 
 
-@app.route('/piece/<int:piece_ref>', methods=['GET'])
+@app.route('/machine/piece/<int:piece_ref>', methods=['GET'])
 def view_piece(piece_ref):
     session = Session()
 

@@ -1,8 +1,9 @@
 # !/usr/bin/env python
-import json
 import ssl
 import threading
+
 import pika
+
 from . import Config, Session
 from .machine import Machine
 from .model_machine import Piece
@@ -44,20 +45,17 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def start_producing(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body), flush=True)
-        dictionary = json.loads(body)
-        number_of_pieces = dictionary['number_of_pieces']
-        order_id = dictionary['order_id']
+    def produce_piece(channel, method, properties, body):
+        print("Producing pieces in machine", flush=True)
+        order_id = int(body)
         session = Session()
-        pieces = []
-        for i in range(number_of_pieces):
-            piece = Piece()
-            piece.order_id = order_id
-            pieces.append(piece)
-            session.add(piece)
+
+        piece = Piece(order_id=order_id)
+
+        session.add(piece)
         session.commit()
-        my_machine.add_pieces_to_queue(pieces)
+
+        my_machine.add_piece_to_queue(piece)
         session.commit()
 
     @staticmethod

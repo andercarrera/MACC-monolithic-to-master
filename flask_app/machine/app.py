@@ -5,7 +5,7 @@ from application import log
 
 app = create_app()
 
-ThreadedConsumer('sagas_commands', 'order.paid', ThreadedConsumer.start_producing)
+ThreadedConsumer('event_exchange', 'machine.produce_piece', ThreadedConsumer.produce_piece)
 ThreadedConsumer('event_exchange', 'order.deleted', ThreadedConsumer.delete_pieces)
 
 # request jwt public key
