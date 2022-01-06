@@ -9,6 +9,9 @@ ThreadedConsumer('sagas_commands', 'order.paid', ThreadedConsumer.start_producin
 ThreadedConsumer('event_exchange', 'machine.piece_finished', ThreadedConsumer.piece_finished)
 ThreadedConsumer('event_exchange', 'delivery.delivered', ThreadedConsumer.pieces_delivered)
 
+ThreadedConsumer('sagas_commands', 'order.cancel', ThreadedConsumer.cancel_order)
+
+
 # request jwt public key
 RsaSingleton.request_public_key()
 

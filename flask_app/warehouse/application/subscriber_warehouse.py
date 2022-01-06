@@ -8,6 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, abort
 
 from . import Config, Session, log
+from .log import create_log
 from .model_warehouse import Order, Piece
 from .publisher_warehouse import publish_msg, publish_round_robin_msg
 
@@ -123,7 +124,31 @@ class ThreadedConsumer:
             session.close()
         session.close()
 
-    # TODO: Store the manufactured pieces that are not more needed because an order has been canceled, and assign them to the next order that arrives
+    @staticmethod
+    def cancel_order(channel, method, properties, body):
+        print("Warehouse order cancel callback", flush=True)
+        session = Session()
+        content = json.loads(body)
+
+        order_id = content['order_id']
+        try:
+            order = session.query(Order).get(order_id)
+            order.status = order.STATUS_CANCELLED
+            session.commit()
+
+            pieces = session.query(Piece).filter(Piece.order_id == order_id)
+
+            for piece in pieces:
+                print("Cancelling piece from order ID: {}".format(order_id), flush=True)
+                piece.order_id = None
+                session.commit()
+
+        except NoResultFound:
+            session.close()
+        except Exception as e:
+            create_log(str(e), 'error')
+            session.rollback()
+        session.close()
 
     # TODO: When a new order is created first check if there are any pieces that can be used for the new order
     #  instead of producing new ones

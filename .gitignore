@@ -154,4 +154,5 @@ fabric.properties
 /flask_app/machine/monolithic.db
 /flask_app/order/monolithic.db
 /flask_app/logs/monolithic.db
+/flask_app/warehouse/monolithic.db
 /*.patch
