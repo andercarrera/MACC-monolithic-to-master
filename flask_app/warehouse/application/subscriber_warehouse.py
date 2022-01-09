@@ -5,7 +5,6 @@ import threading
 
 import pika
 from sqlalchemy.orm.exc import NoResultFound
-from werkzeug.exceptions import NotFound, abort
 
 from . import Config, Session, log
 from .log import create_log
@@ -57,49 +56,65 @@ class ThreadedConsumer:
             new_order = Order(
                 id=order_id,
                 client_id=content['client_id'],
-                number_of_pieces=content['number_of_pieces'],
-                pieces_created=0,
+                number_of_pieces_A=content['number_of_pieces_A'],
+                number_of_pieces_B=content['number_of_pieces_B'],
                 status=Order.STATUS_PREPARING
             )
             print(new_order.as_dict(), flush=True)
             session.add(new_order)
             session.commit()
 
-            number_of_pieces = content['number_of_pieces']
+            number_of_pieces_A = content['number_of_pieces_A']
+            number_of_pieces_B = content['number_of_pieces_B']
 
-            warehouse_pieces = session.query(Piece).filter(Piece.order_id == None).all()
-            print("warehouse Pieces:", flush=True)
-            print(warehouse_pieces, flush=True)
+            warehouse_pieces_A = session.query(Piece).filter(Piece.order_id == None, Piece.type == "A").all()
+            warehouse_pieces_B = session.query(Piece).filter(Piece.order_id == None, Piece.type == "B").all()
 
-            pieces_left_to_produce = number_of_pieces - len(warehouse_pieces)
+            pieces_left_to_produce_A = number_of_pieces_A - len(warehouse_pieces_A)
+            pieces_left_to_produce_B = number_of_pieces_B - len(warehouse_pieces_B)
 
-            print("pieces_left_to_produce", flush=True)
-            print(pieces_left_to_produce, flush=True)
-
-            pieces_to_take = ThreadedConsumer.calculate_pieces_to_take_from_warehouse(number_of_pieces,
-                                                                                      warehouse_pieces)
+            pieces_to_take_A = ThreadedConsumer.calculate_pieces_to_take_from_warehouse(number_of_pieces_A,
+                                                                                        warehouse_pieces_A)
+            pieces_to_take_B = ThreadedConsumer.calculate_pieces_to_take_from_warehouse(number_of_pieces_B,
+                                                                                        warehouse_pieces_B)
 
             order = session.query(Order).get(order_id)
-            for warehouse_piece in range(pieces_to_take):
-                piece = session.query(Piece).filter(Piece.order_id == None).first()
+
+            for warehouse_piece in range(pieces_to_take_A):
+                piece = session.query(Piece).filter(Piece.order_id == None, Piece.type == "A").first()
                 piece.order_id = order_id
-                order.pieces_created += 1
+                order.pieces_created_A += 1
                 session.commit()
 
-            if pieces_left_to_produce > 0:
-                for i in range(pieces_left_to_produce):
-                    publish_round_robin_msg("event_exchange", "machine.produce_piece", str(content['order_id']))
+            for warehouse_piece in range(pieces_to_take_B):
+                piece = session.query(Piece).filter(Piece.order_id == None, Piece.type == "B").first()
+                piece.order_id = order_id
+                order.pieces_created_B += 1
+                session.commit()
+
+            if pieces_left_to_produce_A > 0:
+                for i in range(pieces_left_to_produce_A):
+                    publish_round_robin_msg("event_exchange", "machine.produce_piece_A", str(content['order_id']))
             else:
-                order.status = order.STATUS_ACCEPTED
-                publish_msg("event_exchange", "order.accepted", str(order_id))
-                publish_msg("event_exchange", "delivery.ready", str(order_id))
-                session.commit()
+                ThreadedConsumer.order_ready(order, order_id, session)
 
+            if pieces_left_to_produce_B > 0:
+                for i in range(pieces_left_to_produce_B):
+                    publish_round_robin_msg("event_exchange", "machine.produce_piece_B", str(content['order_id']))
+            else:
+                ThreadedConsumer.order_ready(order, order_id, session)
         except KeyError as e:
             log.create_log(e, 'error')
             session.rollback()
             session.close()
         session.close()
+
+    @staticmethod
+    def order_ready(order, order_id, session):
+        order.status = order.STATUS_ACCEPTED
+        publish_msg("event_exchange", "order.accepted", str(order_id))
+        publish_msg("event_exchange", "delivery.ready", str(order_id))
+        session.commit()
 
     @staticmethod
     def calculate_pieces_to_take_from_warehouse(number_of_pieces, warehouse_pieces):
@@ -110,25 +125,56 @@ class ThreadedConsumer:
         return pieces_to_take
 
     @staticmethod
-    def piece_finished(channel, method, properties, body):
+    def piece_finished_A(channel, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body))
-        print("Warehouse piece finished", flush=True)
+        print("Warehouse piece A finished", flush=True)
         session = Session()
         order_id = int(body)
         try:
             order = session.query(Order).get(order_id)
-            if order.pieces_created < order.number_of_pieces:
-                piece = Piece(order_id=order_id)
+            if order.pieces_created_A < order.number_of_pieces_A:
+                piece = Piece(order_id=order_id,
+                              type="A")
                 session.add(piece)
-                order.pieces_created += 1
+                order.pieces_created_A += 1
                 session.commit()
-            if order.pieces_created == order.number_of_pieces:
-                order.status = order.STATUS_ACCEPTED
-                publish_msg("event_exchange", "order.accepted", body)
-                publish_msg("event_exchange", "delivery.ready", body)
-                session.commit()
+            if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
+                ThreadedConsumer.order_ready(order, order_id, session)
+
+        # Si no encuentra la order -≥ Añadir pieza sin order (viene de warehouse, adelantar producción)
         except NoResultFound:
-            abort(NotFound.code, "Order not found for given order id")
+            piece = Piece(type="A")
+            session.add(piece)
+            session.commit()
+            session.close()
+        except KeyError as e:
+            log.create_log(e, 'error')
+            session.rollback()
+            session.close()
+        session.close()
+
+    @staticmethod
+    def piece_finished_B(channel, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+        print("Warehouse piece B finished", flush=True)
+        session = Session()
+        order_id = int(body)
+        try:
+            order = session.query(Order).get(order_id)
+            if order.pieces_created_B < order.number_of_pieces_B:
+                piece = Piece(order_id=order_id,
+                              type="B")
+                session.add(piece)
+                order.pieces_created_B += 1
+                session.commit()
+            if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
+                ThreadedConsumer.order_ready(order, order_id, session)
+
+        except NoResultFound:
+            piece = Piece(type="B")
+            session.add(piece)
+            session.commit()
+            session.close()
         except KeyError as e:
             log.create_log(e, 'error')
             session.rollback()

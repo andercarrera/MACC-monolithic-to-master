@@ -38,8 +38,10 @@ class Order(BaseModel):
     __tablename__ = "manufacturing_order"
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, nullable=False)
-    number_of_pieces = Column(Integer, nullable=False)
-    pieces_created = Column(Integer, default=0)
+    number_of_pieces_A = Column(Integer, nullable=False)
+    number_of_pieces_B = Column(Integer, nullable=False)
+    pieces_created_A = Column(Integer, default=0)
+    pieces_created_B = Column(Integer, default=0)
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
 
 
@@ -48,3 +50,4 @@ class Piece(BaseModel):
     id = Column(Integer, primary_key=True)
     manufacturing_date = Column(DateTime(timezone=True), server_default=None)
     order_id = Column(Integer, nullable=True)
+    type = Column(String, nullable=False)

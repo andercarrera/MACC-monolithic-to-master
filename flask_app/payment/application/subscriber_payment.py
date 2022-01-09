@@ -10,7 +10,8 @@ from .model_payment import Payment
 from .publisher_payment import publish_msg
 
 base_url_order = "http://{}:{}/".format(Config.ORDER_IP, Config.GUNICORN_PORT)
-piece_price = 10
+piece_price_A = 10
+piece_price_B = 5
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
 ssl.match_hostname = lambda cert, hostname: True
@@ -54,7 +55,9 @@ class ThreadedConsumer:
 
         try:
             client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
-            money = content['number_of_pieces'] * piece_price
+            money = content['number_of_pieces_A'] * piece_price_A
+            money += content['number_of_pieces_B'] * piece_price_B
+
             if client.payment_amount < money:
                 raise Exception("Client does not have enough money")
 
@@ -84,7 +87,8 @@ class ThreadedConsumer:
         content = json.loads(body)
         try:
             client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
-            money = content['number_of_pieces'] * piece_price
+            money = content['number_of_pieces_A'] * piece_price_A
+            money += content['number_of_pieces_B'] * piece_price_B
             client.payment_amount += money
             client.payment_reserved -= money
             session.commit()
@@ -102,7 +106,8 @@ class ThreadedConsumer:
         content = json.loads(body)
         try:
             client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
-            money = content['number_of_pieces'] * piece_price
+            money = content['number_of_pieces_A'] * piece_price_A
+            money += content['number_of_pieces_B'] * piece_price_B
             client.payment_reserved -= money
             session.commit()
         except Exception as e:
@@ -117,7 +122,8 @@ class ThreadedConsumer:
         content = json.loads(body)
         try:
             client = session.query(Payment).filter(Payment.client_id == content['client_id']).one()
-            money = content['number_of_pieces'] * piece_price
+            money = content['number_of_pieces_A'] * piece_price_A
+            money += content['number_of_pieces_B'] * piece_price_B
             client.payment_amount += money
             session.commit()
             content['description'] = None

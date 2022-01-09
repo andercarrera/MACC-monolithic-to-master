@@ -5,10 +5,11 @@ from .publisher_order import publish_msg
 
 
 class CreateOrderState(object):
-    def __init__(self, order_id, user_id, pieces):
+    def __init__(self, order_id, user_id, number_of_pieces_A, number_of_pieces_B):
         self.order_id = order_id
         self.user_id = user_id
-        self.pieces = pieces
+        self.pieces_A = number_of_pieces_A,
+        self.pieces_B = number_of_pieces_B,
         self.state = pending_payment()
         content = {"order_id": self.order_id,
                    "state_machine": Saga.SAGAS_CREATE_ORDER,

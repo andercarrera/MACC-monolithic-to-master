@@ -5,8 +5,8 @@ from application import log
 
 app = create_app()
 
-ThreadedConsumer('event_exchange', 'machine.produce_piece', ThreadedConsumer.produce_piece)
-ThreadedConsumer('event_exchange', 'order.deleted', ThreadedConsumer.delete_pieces)
+ThreadedConsumer('event_exchange', 'machine.produce_piece_A', ThreadedConsumer.produce_piece_A)
+ThreadedConsumer('event_exchange', 'machine.produce_piece_B', ThreadedConsumer.produce_piece_B)
 
 # request jwt public key
 RsaSingleton.request_public_key()

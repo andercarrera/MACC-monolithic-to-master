@@ -5,10 +5,12 @@ import threading
 import pika
 
 from . import Config, Session
-from .machine import Machine
+from .machine_A import Machine_A
+from .machine_B import Machine_B
 from .model_machine import Piece
 
-my_machine = Machine()
+machine_A = Machine_A()
+machine_B = Machine_B()
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
 ssl.match_hostname = lambda cert, hostname: True
@@ -45,29 +47,31 @@ class ThreadedConsumer:
         thread.start()
 
     @staticmethod
-    def produce_piece(channel, method, properties, body):
-        print("Producing pieces in machine", flush=True)
+    def produce_piece_A(channel, method, properties, body):
+        print("Producing A piece in machine", flush=True)
         order_id = int(body)
         session = Session()
 
-        piece = Piece(order_id=order_id)
+        piece = Piece(order_id=order_id,
+                      type="A")
 
         session.add(piece)
         session.commit()
 
-        my_machine.add_piece_to_queue(piece)
+        machine_A.add_piece_to_queue(piece)
         session.commit()
 
     @staticmethod
-    def delete_pieces(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body), flush=True)
+    def produce_piece_B(channel, method, properties, body):
+        print("Producing B piece in machine", flush=True)
         order_id = int(body)
         session = Session()
-        try:
-            pieces = session.query(Piece).filter_by(order_id=order_id).all()
-            my_machine.remove_pieces_from_queue(pieces)
-            session.commit()
-        except KeyError:
-            session.rollback()
-            session.close()
-        session.close()
+
+        piece = Piece(order_id=order_id,
+                      type="B")
+
+        session.add(piece)
+        session.commit()
+
+        machine_B.add_piece_to_queue(piece)
+        session.commit()

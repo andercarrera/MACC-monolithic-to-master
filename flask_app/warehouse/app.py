@@ -6,7 +6,10 @@ from application import log
 app = create_app()
 
 ThreadedConsumer('sagas_commands', 'order.paid', ThreadedConsumer.start_producing)
-ThreadedConsumer('event_exchange', 'machine.piece_finished', ThreadedConsumer.piece_finished)
+
+ThreadedConsumer('event_exchange', 'machine.piece_finished_A', ThreadedConsumer.piece_finished_A)
+ThreadedConsumer('event_exchange', 'machine.piece_finished_B', ThreadedConsumer.piece_finished_B)
+
 ThreadedConsumer('event_exchange', 'delivery.delivered', ThreadedConsumer.pieces_delivered)
 
 ThreadedConsumer('sagas_commands', 'order.cancel', ThreadedConsumer.cancel_order)

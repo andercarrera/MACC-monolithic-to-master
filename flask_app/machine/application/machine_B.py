@@ -11,7 +11,7 @@ from . import publisher_machine
 from .model_machine import Piece
 
 
-class Machine(Thread):
+class Machine_B(Thread):
     STATUS_WAITING = "waiting"
     STATUS_CHANGING_PIECE = "changing Piece"
     STATUS_WORKING = "working"
@@ -22,7 +22,7 @@ class Machine(Thread):
         Thread.__init__(self)
         self.queue = deque([])
         self.working_piece = None
-        self.status = Machine.STATUS_WAITING
+        self.status = Machine_B.STATUS_WAITING
         self.instance = self
         self.queue_not_empty_event = Event()
         self.reload_pieces_at_startup()
@@ -54,7 +54,7 @@ class Machine(Thread):
             self.queue_not_empty_event.clear()
             print("Lock thread because query is empty.")
 
-            self.instance.status = Machine.STATUS_WAITING
+            self.instance.status = Machine_B.STATUS_WAITING
             self.thread_session.close()
 
     def create_piece(self):
@@ -76,18 +76,18 @@ class Machine(Thread):
         self.working_piece = None
 
     def working_piece_to_manufacturing(self):
-        self.status = Machine.STATUS_WORKING
+        self.status = Machine_B.STATUS_WORKING
         self.working_piece.status = Piece.STATUS_MANUFACTURING
         self.thread_session.commit()
         self.thread_session.flush()
 
     def working_piece_to_finished(self):
-        self.instance.status = Machine.STATUS_CHANGING_PIECE
+        self.instance.status = Machine_B.STATUS_CHANGING_PIECE
         self.working_piece.status = Piece.STATUS_MANUFACTURED
         self.thread_session.commit()
         self.thread_session.flush()
 
-        publisher_machine.publish_msg("event_exchange", "machine.piece_finished", str(self.working_piece.order_id))
+        publisher_machine.publish_msg("event_exchange", "machine.piece_finished_B", str(self.working_piece.order_id))
 
     def add_pieces_to_queue(self, pieces):
         for piece in pieces:

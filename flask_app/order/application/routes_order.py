@@ -31,7 +31,8 @@ def create_order():
         new_order = Order(
             description=content['description'],
             client_id=content['client_id'],
-            number_of_pieces=content['number_of_pieces'],
+            number_of_pieces_A=content['number_of_pieces_A'],
+            number_of_pieces_B=content['number_of_pieces_B'],
             status=Order.STATUS_WAITING_FOR_PAYMENT
         )
         session.add(new_order)
@@ -40,22 +41,24 @@ def create_order():
         zip = content['zip']
         address = content['address']
 
-        datos = {"number_of_pieces": new_order.number_of_pieces,
+        datos = {"number_of_pieces_A": new_order.number_of_pieces_A,
+                 "number_of_pieces_B": new_order.number_of_pieces_B,
                  "client_id": new_order.client_id,
                  "order_id": new_order.id,
                  "zip": zip,
                  "address": address}
 
         coordinator = get_coordinator()
-        order_state = CreateOrderState(datos['order_id'], datos['client_id'], datos['number_of_pieces'])
+        order_state = CreateOrderState(datos['order_id'], datos['client_id'], datos['number_of_pieces_A'],
+                                       datos['number_of_pieces_B'])
         coordinator.order_state_list.append(order_state)
 
         print("\ndatos: {}\njson datos: {} \n".format(datos, json.dumps(datos)))
         publish_msg("sagas_commands", "payment.reserved", json.dumps(datos))
-    except KeyError:
+    except KeyError as e:
         session.rollback()
         session.close()
-        abort(BadRequest.code)
+        abort(BadRequest.code, e)
     response = jsonify(new_order.as_dict())
     session.close()
     return response
@@ -148,7 +151,8 @@ def delete_order(order_id):
 
             content = {"order_id": order_id,
                        "client_id": order.client_id,
-                       "number_of_pieces": order.number_of_pieces,
+                       "number_of_pieces_A": order.number_of_pieces_A,
+                       "number_of_pieces_B": order.number_of_pieces_B,
                        "type": 'DELIVERY',
                        }
             publish_msg("sagas_response_exchange", "sagas_process.cancel_order", json.dumps(content))
