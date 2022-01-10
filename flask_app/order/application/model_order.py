@@ -44,6 +44,12 @@ class Order(BaseModel):
     status = Column(String(256), nullable=False, default=STATUS_CREATED)
 
 
+class PieceType(BaseModel):
+    __tablename__ = "catalog"
+    id = Column(Integer, primary_key=True)
+    type = Column(String, nullable=False)
+
+
 class Saga(BaseModel):
     SAGAS_CREATE_ORDER = "Create Order"
     SAGAS_CANCEL_ORDER = "Cancel Order"

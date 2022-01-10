@@ -8,7 +8,7 @@ from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unau
 from . import Session
 from . import publisher_order
 from .auth import RsaSingleton
-from .model_order import Order, Saga
+from .model_order import Order, Saga, PieceType
 from .publisher_order import publish_msg
 # Order Routes #########################################################################################################
 from .sagas_cancel_order import CancelOrderState
@@ -26,6 +26,13 @@ def create_order():
 
     jwt = get_jwt_from_request()
     RsaSingleton.check_jwt_any_role(jwt)
+
+    catalog_pieces = session.query(PieceType.type).all()
+
+    matching_pieces = [s for s in content.keys() if "number_of_pieces" in s]
+
+    if len(catalog_pieces) != len(matching_pieces):
+        abort(BadRequest.code, str("Only allowing the following Piece types: " + catalog_pieces))
 
     try:
         new_order = Order(
