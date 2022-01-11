@@ -1,4 +1,3 @@
-from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import BadRequest, abort
 
 from application import create_app, Session
@@ -13,11 +12,11 @@ def initDB():
     catalog_pieces = session.query(PieceType).all()
     if not catalog_pieces:
         try:
-            new_piecetype = PieceType(type="A")
+            new_piecetype = PieceType(type="A", unit_price=10)
             session.add(new_piecetype)
             session.commit()
 
-            new_piecetype = PieceType(type="B")
+            new_piecetype = PieceType(type="B", unit_price=5)
             session.add(new_piecetype)
             session.commit()
         except KeyError:

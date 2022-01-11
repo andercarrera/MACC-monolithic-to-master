@@ -48,6 +48,7 @@ class PieceType(BaseModel):
     __tablename__ = "catalog"
     id = Column(Integer, primary_key=True)
     type = Column(String, nullable=False)
+    unit_price = Column(Integer, nullable=False)
 
 
 class Saga(BaseModel):
