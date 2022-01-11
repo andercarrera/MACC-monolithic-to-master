@@ -31,8 +31,10 @@ def create_order():
 
     matching_pieces = [s for s in content.keys() if "number_of_pieces" in s]
 
-    if len(catalog_pieces) != len(matching_pieces):
-        abort(BadRequest.code, str("Only allowing the following Piece types: " + catalog_pieces))
+    if len(catalog_pieces) != len(matching_pieces) or \
+            "number_of_pieces_A" not in content.keys() or \
+            "number_of_pieces_B" not in content.keys():
+        abort(BadRequest.code, str("Only allowing number_of_pieces_A and number_of_pieces_B"))
 
     try:
         new_order = Order(
@@ -172,6 +174,20 @@ def delete_order(order_id):
         session.close()
         abort(BadRequest.code)
 
+    session.close()
+    return response
+
+
+# Health Check #######################################################################################################
+@app.route('/order/catalog', methods=['GET'])
+def view_catalog():
+    session = Session()
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt)
+
+    orders = session.query(PieceType).all()
+    response = jsonify(PieceType.list_as_dict(orders))
     session.close()
     return response
 
