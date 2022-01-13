@@ -307,6 +307,8 @@ services:
     #  MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
   consul:
       image: 'consul:latest'
+      logging:
+        driver: none
       ports:
         - '8300:8300'
         - '8301:8301'
