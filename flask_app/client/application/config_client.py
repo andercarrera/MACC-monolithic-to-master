@@ -48,13 +48,7 @@ class Config:
             Config.__instance = self
 
     def get_ip(self):
-        ifaces = ni.interfaces()
-        if "br-ca1e5a751726" in ifaces:  # this is for my specific iface for debugging.
-            self.IP = Config.get_ip_iface("br-ca1e5a751726")
-        elif "eth0" in ifaces:  # this is the default interface in docker
-            self.IP = Config.get_ip_iface("eth0")
-        else:
-            self.IP = "127.0.0.1"
+        self.IP = "10.0.1.242"
 
     @staticmethod
     def get_ip_iface(iface):
