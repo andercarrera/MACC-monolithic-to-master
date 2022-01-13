@@ -31,6 +31,7 @@ class BLConsul:
         self.register_service()
 
     def register_service(self):
+        print("Service registered with {}:{}".format(config.IP, config.PORT), flush=True)
         self.consul.register_service(
             service_id=config.SERVICE_ID,
             name=config.SERVICE_NAME,

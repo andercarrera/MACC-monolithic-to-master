@@ -1,6 +1,7 @@
-from .config_delivery import Config
-from flask_consulate import Consul
 import dns
+from flask_consulate import Consul
+
+from .config_delivery import Config
 
 config = Config.get_instance()
 consul_resolver = dns.resolver.Resolver(configure=False)
@@ -30,6 +31,7 @@ class BLConsul:
         self.register_service()
 
     def register_service(self):
+        print("Service registered with {}:{}".format(config.IP, config.PORT), flush=True)
         self.consul.register_service(
             service_id=config.SERVICE_ID,
             name=config.SERVICE_NAME,
