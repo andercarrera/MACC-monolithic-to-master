@@ -2,13 +2,16 @@ version: '3.1'
 services:
   client:
     build: ./flask_app/client
+    container_name: client
     expose:
-      - '${GUNICORN_PORT}'
+      - '${CLIENT_PORT}'
+    ports:
+      - '${CLIENT_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/client:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${CLIENT_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -34,13 +37,16 @@ services:
         ipv4_address: '${CLIENT_IP}'
   delivery:
     build: ./flask_app/delivery
+    container_name: delivery
     expose:
-      - '${GUNICORN_PORT}'
+      - '${DELIVERY_PORT}'
+    ports:
+      - '${DELIVERY_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/delivery:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${DELIVERY_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -66,13 +72,16 @@ services:
         ipv4_address: '${DELIVERY_IP}'
   machine:
     build: ./flask_app/machine
+    container_name: machine
     expose:
-      - '${GUNICORN_PORT}'
+      - '${MACHINE_PORT}'
+    ports:
+      - '${MACHINE_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/machine:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${MACHINE_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -98,13 +107,16 @@ services:
         ipv4_address: '${MACHINE_IP}'
   order:
     build: ./flask_app/order
+    container_name: order
     expose:
-      - '${GUNICORN_PORT}'
+      - '${ORDER_PORT}'
+    ports:
+      - '${ORDER_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/order:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${ORDER_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -130,13 +142,16 @@ services:
         ipv4_address: '${ORDER_IP}'
   payment:
     build: ./flask_app/payment
+    container_name: payment
     expose:
-      - '${GUNICORN_PORT}'
+      - '${PAYMENT_PORT}'
+    ports:
+      - '${PAYMENT_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/payment:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${PAYMENT_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -162,13 +177,16 @@ services:
         ipv4_address: '${PAYMENT_IP}'
   logs:
     build: ./flask_app/logs
+    container_name: logs
     expose:
-      - '${GUNICORN_PORT}'
+      - '${LOGS_PORT}'
+    ports:
+      - '${LOGS_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/logs:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${LOGS_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -195,13 +213,16 @@ services:
         ipv4_address: '${LOGS_IP}'
   warehouse:
     build: ./flask_app/warehouse
+    container_name: warehouse
     expose:
-      - '${GUNICORN_PORT}'
+      - '${WAREHOUSE_PORT}'
+    ports:
+      - '${WAREHOUSE_PORT}:${GUNICORN_PORT}'
     volumes:
       - './flask_app/warehouse:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
     environment:
-      GUNICORN_PORT: '${GUNICORN_PORT}'
+      GUNICORN_PORT: '${WAREHOUSE_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
@@ -272,6 +293,7 @@ services:
       - 'GUNICORN_PORT=${GUNICORN_PORT}'
       - 'LOGS_IP=${LOGS_IP}'
       - 'CONSUL_IP=${CONSUL_IP}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
     restart: unless-stopped
     #db:
     #image: mysql

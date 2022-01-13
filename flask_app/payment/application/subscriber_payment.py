@@ -9,7 +9,6 @@ from .log import create_log
 from .model_payment import Payment
 from .publisher_payment import publish_msg
 
-base_url_order = "http://{}:{}/".format(Config.ORDER_IP, Config.GUNICORN_PORT)
 piece_price_A = 10
 piece_price_B = 5
 

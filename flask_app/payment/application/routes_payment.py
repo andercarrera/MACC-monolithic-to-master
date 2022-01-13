@@ -4,13 +4,10 @@ from werkzeug.exceptions import NotFound, BadRequest, UnsupportedMediaType, Unau
 
 from . import Session
 from .auth import RsaSingleton
-from .config_payment import Config
 from .model_payment import Payment
 
 piece_price_A = 10
 piece_price_B = 5
-
-base_url_payment = "http://{}:{}/".format(Config.PAYMENT_IP, Config.GUNICORN_PORT)
 
 
 # Payment Routes #######################################################################################################
