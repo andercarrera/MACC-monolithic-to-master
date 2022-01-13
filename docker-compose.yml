@@ -309,6 +309,11 @@ services:
       image: 'consul:latest'
       logging:
         driver: none
+      expose:
+        - '8300'
+        - '8301'
+        - '8500'
+        - '8600'
       ports:
         - '8300:8300'
         - '8301:8301'
