@@ -147,13 +147,13 @@ def delete_order(order_id):
         order = session.query(Order).get(order_id)
         if not order:
             abort(NotFound.code, "Order not found for given order id")
-        if order.status == Order.STATUS_CANCELLED:
+        elif order.status == Order.STATUS_CANCELLED:
             abort(BadRequest.code, "Order already cancelled")
-        if order.status == Order.STATUS_PREPARING:
-            abort(BadRequest.code, "Order still in process, can't be cancelled")
-        if order.status == Order.STATUS_DELIVERED:
+        elif order.status == Order.STATUS_DELIVERED:
             abort(BadRequest.code, "Order already delivered, can't be cancelled")
-        if order.status == Order.STATUS_ACCEPTED:
+        elif order.status == Order.STATUS_CREATED or order.status == Order.STATUS_WAITING_FOR_PAYMENT:
+            abort(BadRequest.code, "Order is still creating. Collision with Create order SAGA")
+        else:
             coordinator = get_coordinator()
             order_state = CancelOrderState(order_id)
             coordinator.order_state_list.append(order_state)

@@ -30,6 +30,7 @@ services:
       SERVICE_NAME: 'client'
       SERVICE_ID: 'client'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
@@ -65,6 +66,7 @@ services:
       SERVICE_NAME: 'delivery'
       SERVICE_ID: 'delivery'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
@@ -100,6 +102,7 @@ services:
       SERVICE_NAME: 'machine'
       SERVICE_ID: 'machine'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
@@ -135,6 +138,7 @@ services:
       SERVICE_NAME: 'order'
       SERVICE_ID: 'order'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
@@ -170,6 +174,7 @@ services:
       SERVICE_NAME: 'payment'
       SERVICE_ID: 'payment'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
@@ -206,6 +211,7 @@ services:
       SERVICE_NAME: 'logs'
       SERVICE_ID: 'logs'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
@@ -241,6 +247,7 @@ services:
       SERVICE_NAME: 'warehouse'
       SERVICE_ID: 'warehouse'
       CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
