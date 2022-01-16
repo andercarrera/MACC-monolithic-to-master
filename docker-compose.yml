@@ -306,24 +306,22 @@ services:
     #  MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
     #  MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
   consul:
-      image: 'consul:latest'
-      logging:
-        driver: none
-      expose:
-        - '8300'
-        - '8301'
-        - '8500'
-        - '8600'
-      ports:
-        - '8300:8300'
-        - '8301:8301'
-        - '8301:8301/udp'
-        - '8500:8500'
-        - '8600:8600'
-        - '8600:8600/udp'
-      networks:
-        lb7_network:
-          ipv4_address: '${CONSUL_IP}'
+    image: 'consul:latest'
+    expose:
+      - '8300'
+      - '8301'
+      - '8500'
+      - '8600'
+    ports:
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'
+      - '8600:8600'
+      - '8600:8600/udp'
+    networks:
+      lb7_network:
+        ipv4_address: '${CONSUL_IP}'
 networks:
   lb7_network:
     driver: bridge
