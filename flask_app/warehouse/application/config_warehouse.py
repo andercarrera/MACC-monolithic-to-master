@@ -28,7 +28,7 @@ class Config:
     SERVICE_NAME = environ.get("SERVICE_NAME", "warehouse")
     SERVICE_ID = environ.get("SERVICE_ID", "warehouse")
     IP = None
-    PORT = int(environ.get("GUNICORN_PORT", '8000'))
+    PORT = int(environ.get("WAREHOUSE_PORT", '8000'))
 
     __instance = None
 

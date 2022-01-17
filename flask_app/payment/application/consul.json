@@ -1,0 +1,16 @@
+{
+  "ID": "payment",
+  "Name": "payment",
+  "Check": {
+    "HTTP": "https://192.168.17.6/payment/health",
+    "TLSSkipVerify": true,
+    "Interval": "10s",
+    "Timeout": "1s"
+  },
+  "Tags": [
+    "ASA"
+  ],
+  "Port": 443,
+  "Address": "192.168.17.6"
+}
+

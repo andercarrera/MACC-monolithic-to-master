@@ -33,7 +33,7 @@ class Config:
     SERVICE_NAME = environ.get("SERVICE_NAME", "logs")
     SERVICE_ID = environ.get("SERVICE_ID", "logs")
     IP = None
-    PORT = int(environ.get("GUNICORN_PORT", '8000'))
+    PORT = int(environ.get("LOGS_PORT", '8000'))
 
     __instance = None
 

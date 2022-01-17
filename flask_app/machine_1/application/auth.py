@@ -68,13 +68,13 @@ def external_service_response(external_service_name, path):
 
 def call_external_service(service):
     config = Config.get_instance()
-    url = "http://{host}:{port}/{service}/{path}".format(
+    url = "https://{host}:{port}/{service}/{path}".format(
         host=service['Address'],
         port=service['Port'],
         service=service['Name'],
         path=service['Path']
     )
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
     if response:
         ret_message = json.dumps({
             "caller": config.SERVICE_NAME,

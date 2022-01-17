@@ -35,7 +35,7 @@ class Config:
     SERVICE_NAME = environ.get("SERVICE_NAME", "payment")
     SERVICE_ID = environ.get("SERVICE_ID", "payment")
     IP = None
-    PORT = int(environ.get("GUNICORN_PORT", '8000'))
+    PORT = int(environ.get("PAYMENT_PORT", '8000'))
 
     __instance = None
 

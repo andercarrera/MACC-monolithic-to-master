@@ -159,7 +159,7 @@ For the examples we will imagine that the IP of the vagrant machine is 10.100.19
 If you execute the app in your IDE, the host will be *localhost*.
 
 ## Create an order [POST]
-* URL: *http://10.100.199.200:13000/order*
+* URL: *https://10.100.199.200:13000/order*
 * Body:
 ```json
 {
@@ -169,23 +169,23 @@ If you execute the app in your IDE, the host will be *localhost*.
 ```
 ## View an Order [GET]:
 You can get the ID when you create the order.
-* URL: *http://10.100.199.200:13000/order/{id}*
+* URL: *https://10.100.199.200:13000/order/{id}*
 ## Remove an Order [DELETE]:
 You can get the ID when you create the order.
-* URL: *http://10.100.199.200:13000/order/{id}*
+* URL: *https://10.100.199.200:13000/order/{id}*
 
 The order will be deleted and the unmanufactured pices will be removed from the machine queue.
 All the unmanufactured pieces of the order will appear as *"Cancelled"* and the orderid will be *null*.
 
 ## View all Orders [GET]:
-* URL: *http://10.100.199.200:13000/order* or *http://10.100.199.200:13000/orders*
+* URL: *https://10.100.199.200:13000/order* or *https://10.100.199.200:13000/orders*
 ## View Machine Status [GET]:
 You can see the queue, the status of the machine and the piece that is being manufactured.
-* URL: *http://10.100.199.200:13000/machine/status*
+* URL: *https://10.100.199.200:13000/machine/status*
 ## View a Piece [GET]:
 You can get the ID when you create the order.
-* URL: *http://10.100.199.200:13000/piece/{id}*
+* URL: *https://10.100.199.200:13000/piece/{id}*
 
 ## View all Pieces [GET]:
-* URL: *http://10.100.199.200:13000/piece* or *http://10.100.199.200:13000/pieces*
+* URL: *https://10.100.199.200:13000/piece* or *https://10.100.199.200:13000/pieces*
 

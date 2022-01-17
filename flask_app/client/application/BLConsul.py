@@ -1,4 +1,7 @@
+import json
+
 import dns
+import requests
 from flask_consulate import Consul
 
 from .config_client import Config
@@ -7,6 +10,14 @@ config = Config.get_instance()
 consul_resolver = dns.resolver.Resolver(configure=False)
 consul_resolver.port = 8600
 consul_resolver.nameservers = [config.CONSUL_IP]
+
+register_service_api_url = "http://{}:8500/v1/agent/service/register".format(Config.CONSUL_IP)
+
+
+def register_service():
+    with open('/app/application/consul.json') as json_file:
+        requests.put(register_service_api_url, json=json.load(json_file))
+        print("Service registered with {}:{}".format(config.IP, config.PORT), flush=True)
 
 
 class BLConsul:
@@ -28,23 +39,7 @@ class BLConsul:
 
     def init_and_register(self, app):
         self.consul = Consul(app=app)
-        self.register_service()
-
-    def register_service(self):
-        print("Service registered with {}:{}".format(config.IP, config.PORT), flush=True)
-        self.consul.register_service(
-            service_id=config.SERVICE_ID,
-            name=config.SERVICE_NAME,
-            interval='10s',
-            tags=['flask', 'microservice', 'aas'],
-            port=config.PORT,
-            address=config.IP,
-            httpcheck='http://{host}:{port}/{service_name}/health'.format(
-                host=config.IP,
-                port=config.PORT,
-                service_name=config.SERVICE_NAME
-            )
-        )
+        register_service()
 
     # This could be an alternative using Consul's REST API
     # def get_service(self, service_name):
