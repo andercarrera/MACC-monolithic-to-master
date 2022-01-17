@@ -38,19 +38,6 @@ def publish_msg(exchange, routing_key, message):
     connection.close()
 
 
-def publish_round_robin_msg(exchange, routing_key, message, queue):
-    channel, connection = create_channel()
-
-    channel.exchange_declare(exchange=exchange, exchange_type='topic')
-    channel.queue_declare(queue=queue, durable=True)
-    channel.basic_publish(
-        exchange=exchange, routing_key=routing_key, body=message, properties=pika.BasicProperties(
-            delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-        ))
-    print(" [x] Sent %r:%r" % (routing_key, message))
-    connection.close()
-
-
 def publish_log(message):
     exchange = 'logger_exchange'
     routing_key = str(message['microservice'] + '.' + message['type'])

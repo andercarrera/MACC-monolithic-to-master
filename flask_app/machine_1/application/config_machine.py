@@ -30,8 +30,8 @@ class Config:
 
     # Consul
     CONSUL_IP = environ.get("CONSUL_IP", "192.168.17.16")
-    SERVICE_NAME = environ.get("SERVICE_NAME", "machine")
-    SERVICE_ID = environ.get("SERVICE_ID", "machine")
+    SERVICE_NAME = environ.get("SERVICE_NAME", "machine1")
+    SERVICE_ID = environ.get("SERVICE_ID", "machine1")
     IP = None
     PORT = int(environ.get("MACHINE_1_PORT", '8000'))
 

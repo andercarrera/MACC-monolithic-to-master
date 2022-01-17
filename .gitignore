@@ -151,7 +151,10 @@ fabric.properties
 /flask_app/client/monolithic.db
 /flask_app/delivery/monolithic.db
 /flask_app/payment/monolithic.db
-/flask_app/machine/monolithic.db
+/flask_app/machine_1/monolithic.db
+/flask_app/machine_2/monolithic.db
+/flask_app/machine_3/monolithic.db
+/flask_app/machine_4/monolithic.db
 /flask_app/order/monolithic.db
 /flask_app/logs/monolithic.db
 /flask_app/warehouse/monolithic.db

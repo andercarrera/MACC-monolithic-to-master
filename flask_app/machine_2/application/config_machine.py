@@ -13,12 +13,10 @@ class Config:
     SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
 
-    DELIVERY_IP = environ.get("DELIVERY_IP")
-    PAYMENT_IP = environ.get("PAYMENT_IP")
-    CLIENT_IP = environ.get("CLIENT_IP")
+    ORDER_IP = environ.get("ORDER_IP")
 
+    CLIENT_IP = environ.get("CLIENT_IP")
     GUNICORN_PORT = environ.get("GUNICORN_PORT")
-    # print(SQLALCHEMY_DATABASE_URI)
 
     """ Set RabbitMQ env vars """
 
@@ -32,10 +30,10 @@ class Config:
 
     # Consul
     CONSUL_IP = environ.get("CONSUL_IP", "192.168.17.16")
-    SERVICE_NAME = environ.get("SERVICE_NAME", "order")
-    SERVICE_ID = environ.get("SERVICE_ID", "order")
+    SERVICE_NAME = environ.get("SERVICE_NAME", "machine2")
+    SERVICE_ID = environ.get("SERVICE_ID", "machine2")
     IP = None
-    PORT = int(environ.get("ORDER_PORT", '8000'))
+    PORT = int(environ.get("MACHINE_2_PORT", '8000'))
 
     __instance = None
 

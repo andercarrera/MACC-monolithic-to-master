@@ -19,7 +19,6 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
@@ -57,7 +56,6 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
@@ -76,25 +74,25 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${DELIVERY_IP}'
-  machine:
-    build: ./flask_app/machine
-    container_name: machine
+  machine1:
+    build: flask_app/machine_1
+    container_name: machine_1
     expose:
-      - '${MACHINE_PORT}'
+      - '${MACHINE_1_PORT}'
     ports:
-      - '${MACHINE_PORT}:${GUNICORN_PORT}'
+      - '${MACHINE_1_PORT}:${GUNICORN_PORT}'
     volumes:
-      - './flask_app/machine:/app'
+      - './flask_app/machine_1:/app'
       - './certs/rabbitmq:/cert_rabbitmq'
       - './certs/gunicorn:/app/certs'
     environment:
-      GUNICORN_PORT: '${MACHINE_PORT}'
+      MACHINE_1_PORT: '${MACHINE_1_PORT}'
+      GUNICORN_PORT: '${GUNICORN_PORT}'
       #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
       SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
@@ -104,15 +102,127 @@ services:
       RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
       RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
       CONSUL_IP: "${CONSUL_IP}"
-      SERVICE_NAME: 'machine'
-      SERVICE_ID: 'machine'
+      SERVICE_NAME: 'machine1'
+      SERVICE_ID: 'machine1'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
     depends_on:
       - consul
     networks:
       lb7_network:
-        ipv4_address: '${MACHINE_IP}'
+        ipv4_address: '${MACHINE_1_IP}'
+  machine2:
+    build: flask_app/machine_2
+    container_name: machine_2
+    expose:
+      - '${MACHINE_2_PORT}'
+    ports:
+      - '${MACHINE_2_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/machine_2:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
+      - './certs/gunicorn:/app/certs'
+    environment:
+      MACHINE_2_PORT: '${MACHINE_2_PORT}'
+      GUNICORN_PORT: '${GUNICORN_PORT}'
+      #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
+      SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
+      SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
+      CLIENT_IP: '${CLIENT_IP}'
+      DELIVERY_IP: '${DELIVERY_IP}'
+      ORDER_IP: '${ORDER_IP}'
+      PAYMENT_IP: '${PAYMENT_IP}'
+      RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'machine2'
+      SERVICE_ID: 'machine2'
+      CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
+    depends_on:
+      - consul
+    networks:
+      lb7_network:
+        ipv4_address: '${MACHINE_2_IP}'
+  machine3:
+    build: flask_app/machine_3
+    container_name: machine_3
+    expose:
+      - '${MACHINE_3_PORT}'
+    ports:
+      - '${MACHINE_3_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/machine_3:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
+      - './certs/gunicorn:/app/certs'
+    environment:
+      MACHINE_3_PORT: '${MACHINE_3_PORT}'
+      GUNICORN_PORT: '${GUNICORN_PORT}'
+      #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
+      SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
+      SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
+      CLIENT_IP: '${CLIENT_IP}'
+      DELIVERY_IP: '${DELIVERY_IP}'
+      ORDER_IP: '${ORDER_IP}'
+      PAYMENT_IP: '${PAYMENT_IP}'
+      RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'machine3'
+      SERVICE_ID: 'machine3'
+      CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
+    depends_on:
+      - consul
+    networks:
+      lb7_network:
+        ipv4_address: '${MACHINE_3_IP}'
+  machine4:
+    build: flask_app/machine_4
+    container_name: machine_4
+    expose:
+      - '${MACHINE_4_PORT}'
+    ports:
+      - '${MACHINE_4_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/machine_4:/app'
+      - './certs/rabbitmq:/cert_rabbitmq'
+      - './certs/gunicorn:/app/certs'
+    environment:
+      MACHINE_4_PORT: '${MACHINE_4_PORT}'
+      GUNICORN_PORT: '${GUNICORN_PORT}'
+      #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
+      SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
+      SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
+      CLIENT_IP: '${CLIENT_IP}'
+      DELIVERY_IP: '${DELIVERY_IP}'
+      ORDER_IP: '${ORDER_IP}'
+      PAYMENT_IP: '${PAYMENT_IP}'
+      RABBITMQ_IP: '${RABBITMQ_IP}'
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
+      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
+      CONSUL_IP: "${CONSUL_IP}"
+      SERVICE_NAME: 'machine4'
+      SERVICE_ID: 'machine4'
+      CONSUL_HOST: '${CONSUL_IP}'
+      PYTHONBUFFERED: 1
+    depends_on:
+      - consul
+    networks:
+      lb7_network:
+        ipv4_address: '${MACHINE_4_IP}'
+
   order:
     build: ./flask_app/order
     container_name: order
@@ -132,7 +242,6 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
@@ -170,7 +279,6 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
@@ -208,7 +316,6 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       LOGS_IP: '${LOGS_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
@@ -247,7 +354,6 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
       CLIENT_IP: '${CLIENT_IP}'
       DELIVERY_IP: '${DELIVERY_IP}'
-      MACHINE_IP: '${MACHINE_IP}'
       ORDER_IP: '${ORDER_IP}'
       PAYMENT_IP: '${PAYMENT_IP}'
       RABBITMQ_IP: '${RABBITMQ_IP}'
@@ -305,7 +411,7 @@ services:
     environment:
       - 'CLIENT_IP=${CLIENT_IP}'
       - 'DELIVERY_IP=${DELIVERY_IP}'
-      - 'MACHINE_IP=${MACHINE_IP}'
+      - 'MACHINE_1_IP=${MACHINE_1_IP}'
       - 'ORDER_IP=${ORDER_IP}'
       - 'PAYMENT_IP=${PAYMENT_IP}'
       - 'HAPROXY_PORT=${HAPROXY_PORT}'
@@ -326,6 +432,7 @@ services:
     #  MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
     #  MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
   consul:
+    container_name: consul
     image: 'consul:latest'
     expose:
       - '8300'

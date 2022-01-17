@@ -94,13 +94,15 @@ class ThreadedConsumer:
 
             if pieces_left_to_produce_A > 0:
                 for i in range(pieces_left_to_produce_A):
-                    publish_round_robin_msg("event_exchange", "machine.produce_piece_A", str(content['order_id']))
+                    publish_round_robin_msg("event_exchange", "machine.produce_piece_A", str(content['order_id']),
+                                            'piece_A')
             else:
                 ThreadedConsumer.order_ready(order, order_id, session)
 
             if pieces_left_to_produce_B > 0:
                 for i in range(pieces_left_to_produce_B):
-                    publish_round_robin_msg("event_exchange", "machine.produce_piece_B", str(content['order_id']))
+                    publish_round_robin_msg("event_exchange", "machine.produce_piece_B", str(content['order_id']),
+                                            'piece_B')
             else:
                 ThreadedConsumer.order_ready(order, order_id, session)
         except KeyError as e:
@@ -124,54 +126,47 @@ class ThreadedConsumer:
             pieces_to_take = len(warehouse_pieces)
         return pieces_to_take
 
+    # TODO: [CANCEL ORDER] cuando se canele una orden, dejar warehouse deja de asignar piezas a esa orden y las
+    #  guarda en warehouse sin order-id
+
+    # TODO: Mejorar el ACK de cada maquina
     @staticmethod
-    def piece_finished_A(channel, method, properties, body):
+    def piece_finished(channel, method, properties, body):
+        print("Warehouse piece finished callback", flush=True)
         print(" [x] %r:%r" % (method.routing_key, body))
-        print("Warehouse piece A finished", flush=True)
         session = Session()
-        order_id = int(body)
+        content = json.loads(body)
+        order_id = content['order_id']
+        piece_type = content['type']
+        machine_id = content['machine']
+
+        print_msg = str(piece_type + " piece type received in warehouse by machine " + str(machine_id))
+        create_log(print_msg, 'info')
+        print(print_msg, flush=True)
+
         try:
             order = session.query(Order).get(order_id)
-            if order.pieces_created_A < order.number_of_pieces_A:
+            if order.status == order.STATUS_PREPARING:
                 piece = Piece(order_id=order_id,
-                              type="A")
+                              type=piece_type,
+                              machine_id=machine_id)
                 session.add(piece)
-                order.pieces_created_A += 1
+
+                if piece_type == "A":
+                    order.pieces_created_A += 1
+                if piece_type == "B":
+                    order.pieces_created_B += 1
                 session.commit()
-            if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
-                ThreadedConsumer.order_ready(order, order_id, session)
+
+                if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
+                    ThreadedConsumer.order_ready(order, order_id, session)
 
         # Si no encuentra la order -≥ Añadir pieza sin order (viene de warehouse, adelantar producción)
         except NoResultFound:
-            piece = Piece(type="A")
-            session.add(piece)
-            session.commit()
-            session.close()
-        except KeyError as e:
-            log.create_log(e, 'error')
-            session.rollback()
-            session.close()
-        session.close()
-
-    @staticmethod
-    def piece_finished_B(channel, method, properties, body):
-        print(" [x] %r:%r" % (method.routing_key, body))
-        print("Warehouse piece B finished", flush=True)
-        session = Session()
-        order_id = int(body)
-        try:
-            order = session.query(Order).get(order_id)
-            if order.pieces_created_B < order.number_of_pieces_B:
-                piece = Piece(order_id=order_id,
-                              type="B")
-                session.add(piece)
-                order.pieces_created_B += 1
-                session.commit()
-            if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
-                ThreadedConsumer.order_ready(order, order_id, session)
-
-        except NoResultFound:
-            piece = Piece(type="B")
+            print("Warehouse piece {} finished without order_id, forwarding production...".format(piece_type),
+                  flush=True)
+            piece = Piece(type=piece_type,
+                          machine_id=machine_id)
             session.add(piece)
             session.commit()
             session.close()

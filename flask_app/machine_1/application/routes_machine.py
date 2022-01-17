@@ -7,12 +7,10 @@ from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, Unsup
 
 from . import Session
 from .auth import RsaSingleton
-from .machine_A import Machine_A
-from .machine_B import Machine_B
+from .machine import Machine
 from .model_machine import Piece
 
-machine_A = Machine_A()
-machine_B = Machine_B()
+machine = Machine()
 
 
 def get_jwt_from_request():
@@ -26,8 +24,8 @@ def get_jwt_from_request():
 # Machine Routes #######################################################################################################
 
 
-@app.route('/machine/piece', methods=['GET'])
-@app.route('/machine/pieces', methods=['GET'])
+@app.route('/machine1/piece', methods=['GET'])
+@app.route('/machine1/pieces', methods=['GET'])
 def view_pieces():
     session = Session()
 
@@ -44,7 +42,7 @@ def view_pieces():
     return response
 
 
-@app.route('/machine/piece/<int:piece_ref>', methods=['GET'])
+@app.route('/machine1/piece/<int:piece_ref>', methods=['GET'])
 def view_piece(piece_ref):
     session = Session()
 
@@ -60,41 +58,24 @@ def view_piece(piece_ref):
 
 
 # Machine Routes #######################################################################################################
-@app.route('/machine/status/A', methods=['GET'])
-def view_machine_A_status():
+@app.route('/machine1/status', methods=['GET'])
+def view_machine_status():
     session = Session()
 
     jwt_token = get_jwt_from_request()
     RsaSingleton.check_jwt_any_role(jwt_token)
 
-    working_piece = machine_A.working_piece
-    queue = machine_A.queue
+    working_piece = machine.working_piece
+    queue = machine.queue
     if working_piece:
         working_piece = working_piece.as_dict()
-    response = {"status": machine_A.status, "working_piece": working_piece, "queue": list(queue)}
-    session.close()
-    return jsonify(response)
-
-
-# Machine Routes #######################################################################################################
-@app.route('/machine/status/B', methods=['GET'])
-def view_machine_B_status():
-    session = Session()
-
-    jwt_token = get_jwt_from_request()
-    RsaSingleton.check_jwt_any_role(jwt_token)
-
-    working_piece = machine_B.working_piece
-    queue = machine_B.queue
-    if working_piece:
-        working_piece = working_piece.as_dict()
-    response = {"status": machine_B.status, "working_piece": working_piece, "queue": list(queue)}
+    response = {"status": machine.status, "working_piece": working_piece, "queue": list(queue)}
     session.close()
     return jsonify(response)
 
 
 # Health Check #######################################################################################################
-@app.route('/machine/health', methods=['HEAD', 'GET'])
+@app.route('/machine1/health', methods=['HEAD', 'GET'])
 @app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()

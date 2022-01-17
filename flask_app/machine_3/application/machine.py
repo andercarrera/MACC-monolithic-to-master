@@ -1,6 +1,5 @@
 import json
 from collections import deque
-from random import randint
 from threading import Thread, Lock, Event
 from time import sleep
 
@@ -10,8 +9,11 @@ from . import Session
 from . import publisher_machine
 from .model_machine import Piece
 
+manufacturing_speed = 2
+machine_id = 3
 
-class Machine_A(Thread):
+
+class Machine(Thread):
     STATUS_WAITING = "waiting"
     STATUS_CHANGING_PIECE = "changing Piece"
     STATUS_WORKING = "working"
@@ -22,7 +24,7 @@ class Machine_A(Thread):
         Thread.__init__(self)
         self.queue = deque([])
         self.working_piece = None
-        self.status = Machine_A.STATUS_WAITING
+        self.status = Machine.STATUS_WAITING
         self.instance = self
         self.queue_not_empty_event = Event()
         self.reload_pieces_at_startup()
@@ -54,7 +56,7 @@ class Machine_A(Thread):
             self.queue_not_empty_event.clear()
             print("Lock thread because query is empty.")
 
-            self.instance.status = Machine_A.STATUS_WAITING
+            self.instance.status = Machine.STATUS_WAITING
             self.thread_session.close()
 
     def create_piece(self):
@@ -68,7 +70,7 @@ class Machine_A(Thread):
         self.working_piece_to_manufacturing()
 
         # Simulate piece is being manufactured
-        sleep(randint(5, 10))
+        sleep(manufacturing_speed)
 
         # Machine and piece status updated after manufacturing
         self.working_piece_to_finished()
@@ -76,18 +78,22 @@ class Machine_A(Thread):
         self.working_piece = None
 
     def working_piece_to_manufacturing(self):
-        self.status = Machine_A.STATUS_WORKING
+        self.status = Machine.STATUS_WORKING
         self.working_piece.status = Piece.STATUS_MANUFACTURING
         self.thread_session.commit()
         self.thread_session.flush()
 
     def working_piece_to_finished(self):
-        self.instance.status = Machine_A.STATUS_CHANGING_PIECE
+        self.instance.status = Machine.STATUS_CHANGING_PIECE
         self.working_piece.status = Piece.STATUS_MANUFACTURED
         self.thread_session.commit()
         self.thread_session.flush()
 
-        publisher_machine.publish_msg("event_exchange", "machine.piece_finished_A", str(self.working_piece.order_id))
+        body = {"order_id": self.working_piece.order_id,
+                "type": self.working_piece.type,
+                "machine": machine_id}
+
+        publisher_machine.publish_msg("event_exchange", "machine.piece_finished", json.dumps(body))
 
     def add_pieces_to_queue(self, pieces):
         for piece in pieces:

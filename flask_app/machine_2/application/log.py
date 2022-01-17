@@ -3,7 +3,7 @@ from .publisher_machine import publish_log
 
 def create_log(message, log_type):
     log = {
-        'microservice': 'machine',
+        'microservice': 'machine_2',
         'message': message,
         'type': log_type
     }
