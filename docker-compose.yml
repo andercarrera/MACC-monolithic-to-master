@@ -32,6 +32,7 @@ services:
       SERVICE_ID: 'client'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -69,6 +70,7 @@ services:
       SERVICE_ID: 'delivery'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -106,6 +108,7 @@ services:
       SERVICE_ID: 'machine1'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -143,6 +146,7 @@ services:
       SERVICE_ID: 'machine2'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -180,6 +184,7 @@ services:
       SERVICE_ID: 'machine3'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -217,6 +222,7 @@ services:
       SERVICE_ID: 'machine4'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -255,6 +261,7 @@ services:
       SERVICE_ID: 'order'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -292,6 +299,7 @@ services:
       SERVICE_ID: 'payment'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -330,6 +338,7 @@ services:
       SERVICE_ID: 'logs'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
@@ -367,6 +376,7 @@ services:
       SERVICE_ID: 'warehouse'
       CONSUL_HOST: '${CONSUL_IP}'
       PYTHONBUFFERED: 1
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
     depends_on:
       - consul
     networks:
