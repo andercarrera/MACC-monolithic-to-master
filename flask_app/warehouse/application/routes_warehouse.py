@@ -1,13 +1,36 @@
+import json
+
 from flask import current_app as app
 from flask import request, jsonify, abort
-from werkzeug.exceptions import NotFound, Unauthorized, ServiceUnavailable
+from werkzeug.exceptions import NotFound, Unauthorized, ServiceUnavailable, UnsupportedMediaType, BadRequest
 
 from . import Session
 from .auth import RsaSingleton
 from .model_warehouse import Piece, Order
-
-
 # Order Routes #####################################################################################################
+from .publisher_warehouse import publish_msg
+
+
+@app.route('/warehouse', methods=['POST'])
+def forward_production():
+    session = Session()
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    content = request.json
+
+    jwt = get_jwt_from_request()
+    RsaSingleton.check_jwt_any_role(jwt)
+
+    try:
+        publish_msg("event_exchange", "warehouse.forward", json.dumps(content))
+    except KeyError as e:
+        session.rollback()
+        session.close()
+        abort(BadRequest.code, e)
+    session.close()
+    return 'OK', 200
+
+
 @app.route('/warehouse/order', methods=['GET'])
 @app.route('/warehouse/orders', methods=['GET'])
 def view_orders():

@@ -1,15 +1,12 @@
 # !/usr/bin/env python
 import ssl
 import threading
-import time
 
 import pika
 
 from . import Config, Session
-from .machine import Machine
+from .machine import produce_piece
 from .model_machine import Piece
-
-machine = Machine()
 
 # solves the following: https://stackoverflow.com/questions/28768530/certificateerror-hostname-doesnt-match
 ssl.match_hostname = lambda cert, hostname: True
@@ -50,7 +47,12 @@ class ThreadedConsumer:
     @staticmethod
     def produce_piece_A(channel, method, properties, body):
         print("Producing A piece in machine_1", flush=True)
-        order_id = int(body)
+        print(body, flush=True)
+
+        if body.decode() == '':
+            order_id = None
+        else:
+            order_id = int(body)
         session = Session()
 
         piece = Piece(order_id=order_id,
@@ -59,16 +61,21 @@ class ThreadedConsumer:
         session.add(piece)
         session.commit()
 
-        machine.add_piece_to_queue(piece)
+        produce_piece(piece.order_id, piece.type)
+
+        piece.status = Piece.STATUS_MANUFACTURED
         session.commit()
 
-        time.sleep(2)
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     @staticmethod
     def produce_piece_B(channel, method, properties, body):
         print("Producing B piece in machine_1", flush=True)
-        order_id = int(body)
+
+        if body.decode() == '':
+            order_id = None
+        else:
+            order_id = int(body)
         session = Session()
 
         piece = Piece(order_id=order_id,
@@ -77,8 +84,9 @@ class ThreadedConsumer:
         session.add(piece)
         session.commit()
 
-        machine.add_piece_to_queue(piece)
+        produce_piece(piece.order_id, piece.type)
+
+        piece.status = Piece.STATUS_MANUFACTURED
         session.commit()
 
-        time.sleep(2)
         channel.basic_ack(delivery_tag=method.delivery_tag)

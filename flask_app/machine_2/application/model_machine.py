@@ -38,5 +38,5 @@ class Piece(BaseModel):
     id = Column(Integer, primary_key=True)
     manufacturing_date = Column(DateTime(timezone=True), server_default=None)
     status = Column(String(256), default=STATUS_QUEUED)
-    order_id = Column(Integer, nullable=False)
+    order_id = Column(Integer, nullable=True)
     type = Column(String, nullable=False)

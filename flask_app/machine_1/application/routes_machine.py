@@ -7,10 +7,7 @@ from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, Unsup
 
 from . import Session
 from .auth import RsaSingleton
-from .machine import Machine
 from .model_machine import Piece
-
-machine = Machine()
 
 
 def get_jwt_from_request():
@@ -55,23 +52,6 @@ def view_piece(piece_ref):
     response = jsonify(piece.as_dict())
     session.close()
     return response
-
-
-# Machine Routes #######################################################################################################
-@app.route('/machine1/status', methods=['GET'])
-def view_machine_status():
-    session = Session()
-
-    jwt_token = get_jwt_from_request()
-    RsaSingleton.check_jwt_any_role(jwt_token)
-
-    working_piece = machine.working_piece
-    queue = machine.queue
-    if working_piece:
-        working_piece = working_piece.as_dict()
-    response = {"status": machine.status, "working_piece": working_piece, "queue": list(queue)}
-    session.close()
-    return jsonify(response)
 
 
 # Health Check #######################################################################################################

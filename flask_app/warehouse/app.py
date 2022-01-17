@@ -13,6 +13,7 @@ ThreadedConsumer('event_exchange', 'delivery.delivered', ThreadedConsumer.pieces
 
 ThreadedConsumer('sagas_commands', 'order.cancel', ThreadedConsumer.cancel_order)
 
+ThreadedConsumer('event_exchange', 'warehouse.forward', ThreadedConsumer.forward_production)
 
 # request jwt public key
 RsaSingleton.request_public_key()

@@ -15,6 +15,16 @@ from .publisher_warehouse import publish_msg, publish_round_robin_msg
 ssl.match_hostname = lambda cert, hostname: True
 
 
+def save_piece_without_order_id(machine_id, piece_type):
+    session = Session()
+    piece = Piece(type=piece_type,
+                  machine_id=machine_id)
+    session.add(piece)
+    session.commit()
+    session.flush()
+    session.close()
+
+
 class ThreadedConsumer:
     context = ssl.create_default_context(
         cafile=Config.CA_CERTS)
@@ -63,6 +73,7 @@ class ThreadedConsumer:
             print(new_order.as_dict(), flush=True)
             session.add(new_order)
             session.commit()
+            session.flush()
 
             number_of_pieces_A = content['number_of_pieces_A']
             number_of_pieces_B = content['number_of_pieces_B']
@@ -85,12 +96,14 @@ class ThreadedConsumer:
                 piece.order_id = order_id
                 order.pieces_created_A += 1
                 session.commit()
+                session.flush()
 
             for warehouse_piece in range(pieces_to_take_B):
                 piece = session.query(Piece).filter(Piece.order_id == None, Piece.type == "B").first()
                 piece.order_id = order_id
                 order.pieces_created_B += 1
                 session.commit()
+                session.flush()
 
             if pieces_left_to_produce_A > 0:
                 for i in range(pieces_left_to_produce_A):
@@ -117,6 +130,7 @@ class ThreadedConsumer:
         publish_msg("event_exchange", "order.accepted", str(order_id))
         publish_msg("event_exchange", "delivery.ready", str(order_id))
         session.commit()
+        session.flush()
 
     @staticmethod
     def calculate_pieces_to_take_from_warehouse(number_of_pieces, warehouse_pieces):
@@ -126,10 +140,6 @@ class ThreadedConsumer:
             pieces_to_take = len(warehouse_pieces)
         return pieces_to_take
 
-    # TODO: [CANCEL ORDER] cuando se canele una orden, dejar warehouse deja de asignar piezas a esa orden y las
-    #  guarda en warehouse sin order-id
-
-    # TODO: Mejorar el ACK de cada maquina
     @staticmethod
     def piece_finished(channel, method, properties, body):
         print("Warehouse piece finished callback", flush=True)
@@ -144,37 +154,39 @@ class ThreadedConsumer:
         create_log(print_msg, 'info')
         print(print_msg, flush=True)
 
-        try:
-            order = session.query(Order).get(order_id)
-            if order.status == order.STATUS_PREPARING:
-                piece = Piece(order_id=order_id,
-                              type=piece_type,
-                              machine_id=machine_id)
-                session.add(piece)
+        if order_id is None:
+            save_piece_without_order_id(machine_id, piece_type)
+        else:
+            try:
+                order = session.query(Order).get(order_id)
+                if order.status == order.STATUS_CANCELLED:
+                    save_piece_without_order_id(machine_id, piece_type)
 
-                if piece_type == "A":
-                    order.pieces_created_A += 1
-                if piece_type == "B":
-                    order.pieces_created_B += 1
-                session.commit()
+                if order.status == order.STATUS_PREPARING:
+                    piece = Piece(order_id=order_id,
+                                  type=piece_type,
+                                  machine_id=machine_id)
+                    session.add(piece)
 
-                if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
-                    ThreadedConsumer.order_ready(order, order_id, session)
+                    if piece_type == "A":
+                        order.pieces_created_A += 1
+                    if piece_type == "B":
+                        order.pieces_created_B += 1
+                    session.commit()
+                    session.flush()
 
-        # Si no encuentra la order -≥ Añadir pieza sin order (viene de warehouse, adelantar producción)
-        except NoResultFound:
-            print("Warehouse piece {} finished without order_id, forwarding production...".format(piece_type),
-                  flush=True)
-            piece = Piece(type=piece_type,
-                          machine_id=machine_id)
-            session.add(piece)
-            session.commit()
+                    if order.pieces_created_A == order.number_of_pieces_A and order.pieces_created_B == order.number_of_pieces_B:
+                        ThreadedConsumer.order_ready(order, order_id, session)
+            except NoResultFound:
+                # Si no encuentra la order -≥ Añadir pieza sin order (viene de warehouse, adelantar producción)
+                print("Warehouse piece {} finished without order_id, forwarding production...".format(piece_type),
+                      flush=True)
+                save_piece_without_order_id(machine_id, piece_type)
+            except KeyError as e:
+                log.create_log(e, 'error')
+                session.rollback()
+                session.close()
             session.close()
-        except KeyError as e:
-            log.create_log(e, 'error')
-            session.rollback()
-            session.close()
-        session.close()
 
     @staticmethod
     def pieces_delivered(channel, method, properties, body):
@@ -185,6 +197,7 @@ class ThreadedConsumer:
             order = session.query(Order).get(order_id)
             order.status = order.STATUS_DELIVERED
             session.commit()
+            session.flush()
 
             pieces = session.query(Piece).filter(Piece.order_id == order_id)
 
@@ -192,6 +205,7 @@ class ThreadedConsumer:
                 print("Removing piece from order ID: {}".format(order_id), flush=True)
                 session.delete(piece)
                 session.commit()
+                session.flush()
 
         except NoResultFound:
             session.close()
@@ -201,6 +215,7 @@ class ThreadedConsumer:
             session.close()
         session.close()
 
+    # TODO: cuando se cancela la orden, warehouse se queda atascado.
     @staticmethod
     def cancel_order(channel, method, properties, body):
         print("Warehouse order cancel callback", flush=True)
@@ -225,4 +240,25 @@ class ThreadedConsumer:
         except Exception as e:
             create_log(str(e), 'error')
             session.rollback()
+
+    @staticmethod
+    def forward_production(channel, method, properties, body):
+        print('Forward production', flush=True)
+        content = json.loads(body)
+        session = Session()
+        try:
+            number_of_pieces_A = content['number_of_pieces_A']
+            number_of_pieces_B = content['number_of_pieces_B']
+
+            for i in range(number_of_pieces_A):
+                publish_round_robin_msg("event_exchange", "machine.produce_piece_A", '',
+                                        'piece_A')
+
+            for i in range(number_of_pieces_B):
+                publish_round_robin_msg("event_exchange", "machine.produce_piece_B", '',
+                                        'piece_B')
+        except KeyError as e:
+            log.create_log(e, 'error')
+            session.rollback()
+            session.close()
         session.close()
