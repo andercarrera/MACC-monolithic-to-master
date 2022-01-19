@@ -2,7 +2,7 @@
   "ID": "order",
   "Name": "order",
   "Check": {
-    "HTTP": "https://192.168.1.46:8004/order/health",
+    "HTTP": "https://10.0.1.242:8004/order/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -11,6 +11,6 @@
     "ASA"
   ],
   "Port": 8004,
-  "Address": "192.168.1.46"
+  "Address": "10.0.1.242"
 }
 

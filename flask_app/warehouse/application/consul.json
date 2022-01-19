@@ -2,7 +2,7 @@
   "ID": "warehouse",
   "Name": "warehouse",
   "Check": {
-    "HTTP": "https://192.168.1.46:8008/warehouse/health",
+    "HTTP": "https://10.0.1.242:8008/warehouse/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -11,6 +11,6 @@
     "ASA"
   ],
   "Port": 8008,
-  "Address": "192.168.1.46"
+  "Address": "10.0.1.242"
 }
 
