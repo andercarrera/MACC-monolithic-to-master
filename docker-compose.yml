@@ -402,51 +402,6 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${WAREHOUSE_IP}'
-  rabbitmq:
-    image: rabbitmq:3.8-management
-    environment:
-      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
-      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
-      RABBITMQ_DEFAULT_VHOST: "/"
-      RABBITMQ_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
-      RABBITMQ_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
-      RABBITMQ_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
-      RABBITMQ_MANAGEMENT_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
-      RABBITMQ_MANAGEMENT_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
-      RABBITMQ_MANAGEMENT_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
-    expose:
-      - "15671"
-      - "5671"
-    network_mode: "host"
-    volumes:
-      - './certs/rabbitmq:/cert_rabbitmq'
-  haproxy:
-    build: ./haproxy
-    ports:
-      - '${HAPROXY_PORT}:${HAPROXY_PORT}'
-      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
-    expose:
-      - '${HAPROXY_PORT}'
-      - '${HAPROXY_STATS_PORT}'
-    volumes:
-      - ./certs/haproxy/haproxy.pem:/usr/local/etc/haproxy/haproxy.pem
-    networks:
-      lb7_network:
-        ipv4_address: '${HAPROXY_IP}'
-    environment:
-      - 'CLIENT_IP=${CLIENT_IP}'
-      - 'DELIVERY_IP=${DELIVERY_IP}'
-      - 'MACHINE_1_IP=${MACHINE_1_IP}'
-      - 'ORDER_IP=${ORDER_IP}'
-      - 'PAYMENT_IP=${PAYMENT_IP}'
-      - 'HAPROXY_PORT=${HAPROXY_PORT}'
-      - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
-      - 'GUNICORN_PORT=${GUNICORN_PORT}'
-      - 'LOGS_IP=${LOGS_IP}'
-      - 'CONSUL_IP=${CONSUL_IP}'
-      - 'RABBITMQ_IP=${RABBITMQ_IP}'
-      - 'FLASK_IP=${FLASK_IP}'
-    restart: unless-stopped
     #db:
     #image: mysql
     #restart: always
