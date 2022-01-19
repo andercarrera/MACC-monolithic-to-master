@@ -9,7 +9,7 @@ ssl.match_hostname = lambda cert, hostname: True
 def publish_msg(exchange, routing_key, message):
     ssl_options = set_ssl()
 
-    credentials = pika.PlainCredentials(username='rabbitmq', password='rabbitmq')
+    credentials = pika.PlainCredentials(username=Config.RABBITMQ_USER, password=Config.RABBITMQ_PASS)
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
             ssl_options=ssl_options,

@@ -1,5 +1,7 @@
+import json
 from os import environ
 
+import boto3
 import netifaces as ni
 from dotenv import load_dotenv
 
@@ -16,9 +18,19 @@ class Config:
     """ Set RabbitMQ env vars """
 
     RABBITMQ_IP = environ.get("RABBITMQ_IP")
-    RABBITMQ_USER = environ.get("RABBITMQ_USER")
-    RABBITMQ_PASS = environ.get("RABBITMQ_PASS")
+    client = boto3.client('secretsmanager')
 
+    if environ.get("RABBITMQ_USER") is not None:
+        RABBITMQ_USER = environ.get("RABBITMQ_USER")
+    else:
+        rabbitmq_user_secret = client.get_secret_value(SecretId='rabbitmq_user')
+        RABBITMQ_USER = json.loads(rabbitmq_user_secret['SecretString'])['rabbitmq_user']
+
+    if environ.get("RABBITMQ_PASS") is not None:
+        RABBITMQ_PASS = environ.get("RABBITMQ_PASS")
+    else:
+        rabbitmq_user_secret = client.get_secret_value(SecretId='rabbitmq_password')
+        RABBITMQ_PASS = json.loads(rabbitmq_user_secret['SecretString'])['rabbitmq_password']
     CA_CERTS = environ.get("RABBITMQ_CA_CERT")
     KEY_FILE = environ.get("RABBITMQ_CLIENT_KEY")
     CERT_FILE = environ.get("RABBITMQ_CLIENT_CERT")

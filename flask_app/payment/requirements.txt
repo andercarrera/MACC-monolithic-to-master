@@ -36,3 +36,5 @@ flask-consulate==0.2.0
 
 # To get my IP
 netifaces==0.10.9
+
+boto3

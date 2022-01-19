@@ -27,7 +27,7 @@ class ThreadedConsumer:
         self.rabbitMQConnection()
 
     def rabbitMQConnection(self):
-        credentials = pika.PlainCredentials(username='rabbitmq', password='rabbitmq')
+        credentials = pika.PlainCredentials(username=Config.RABBITMQ_USER, password=Config.RABBITMQ_PASS)
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 ssl_options=self.ssl_options,
