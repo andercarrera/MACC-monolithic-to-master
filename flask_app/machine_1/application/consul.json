@@ -2,7 +2,7 @@
   "ID": "machine1",
   "Name": "machine1",
   "Check": {
-    "HTTP": "https://192.168.17.4/machine1/health",
+    "HTTP": "https://192.168.1.46:8003/machine1/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -10,7 +10,7 @@
   "Tags": [
     "ASA"
   ],
-  "Port": 443,
-  "Address": "192.168.17.4"
+  "Port": 8003,
+  "Address": "192.168.1.46"
 }
 

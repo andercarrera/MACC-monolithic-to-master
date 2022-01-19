@@ -2,7 +2,7 @@
   "ID": "payment",
   "Name": "payment",
   "Check": {
-    "HTTP": "https://192.168.17.6/payment/health",
+    "HTTP": "https://192.168.1.46:8005/payment/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -10,7 +10,7 @@
   "Tags": [
     "ASA"
   ],
-  "Port": 443,
-  "Address": "192.168.17.6"
+  "Port": 8005,
+  "Address": "192.168.1.46"
 }
 

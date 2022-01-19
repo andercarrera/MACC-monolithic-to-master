@@ -34,6 +34,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -73,6 +74,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -112,6 +114,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -151,6 +154,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -190,6 +194,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -229,6 +234,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -269,6 +275,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -308,6 +315,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -348,6 +356,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -387,6 +396,7 @@ services:
       PYTHONBUFFERED: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
+      FLASK_IP: '${FLASK_IP}'
     depends_on:
       - consul
     networks:
@@ -404,15 +414,10 @@ services:
       RABBITMQ_MANAGEMENT_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
       RABBITMQ_MANAGEMENT_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
       RABBITMQ_MANAGEMENT_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
-    ports:
-      - "15671:15671"
-      - "5671:5671"
     expose:
       - "15671"
       - "5671"
-    networks:
-      lb7_network:
-        ipv4_address: '${RABBITMQ_IP}'
+    network_mode: "host"
     volumes:
       - './certs/rabbitmq:/cert_rabbitmq'
   haproxy:
@@ -440,6 +445,7 @@ services:
       - 'LOGS_IP=${LOGS_IP}'
       - 'CONSUL_IP=${CONSUL_IP}'
       - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'FLASK_IP=${FLASK_IP}'
     restart: unless-stopped
     #db:
     #image: mysql
@@ -459,16 +465,7 @@ services:
       - '8301'
       - '8500'
       - '8600'
-    ports:
-      - '8300:8300'
-      - '8301:8301'
-      - '8301:8301/udp'
-      - '8500:8500'
-      - '8600:8600'
-      - '8600:8600/udp'
-    networks:
-      lb7_network:
-        ipv4_address: '${CONSUL_IP}'
+    network_mode: "host"
 networks:
   lb7_network:
     driver: bridge

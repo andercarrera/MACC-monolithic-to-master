@@ -41,8 +41,8 @@ class Config:
     CONSUL_IP = environ.get("CONSUL_IP", "192.168.17.16")
     SERVICE_NAME = environ.get("SERVICE_NAME", "client")
     SERVICE_ID = environ.get("SERVICE_ID", "client")
-    IP = None
-    PORT = int(environ.get("GUNICORN_PORT", '8000'))
+    IP = environ.get("FLASK_IP")
+    PORT = int(environ.get("CLIENT_PORT", '8000'))
 
     __instance = None
 
@@ -57,17 +57,7 @@ class Config:
         if Config.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
-            self.get_ip()
             Config.__instance = self
-
-    def get_ip(self):
-        ifaces = ni.interfaces()
-        if "br-ca1e5a751726" in ifaces:  # this is for my specific iface for debugging.
-            self.IP = Config.get_ip_iface("br-ca1e5a751726")
-        elif "eth0" in ifaces:  # this is the default interface in docker
-            self.IP = Config.get_ip_iface("eth0")
-        else:
-            self.IP = "127.0.0.1"
 
     @staticmethod
     def get_ip_iface(iface):
