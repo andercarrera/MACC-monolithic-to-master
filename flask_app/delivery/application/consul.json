@@ -2,7 +2,7 @@
   "ID": "delivery",
   "Name": "delivery",
   "Check": {
-    "HTTP": "https://10.0.1.242:8002/delivery/health",
+    "HTTP": "https://10.0.2.11:8002/delivery/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -11,6 +11,6 @@
     "ASA"
   ],
   "Port": 8002,
-  "Address": "10.0.1.242"
+  "Address": "10.0.2.11"
 }
 

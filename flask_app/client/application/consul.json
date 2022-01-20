@@ -2,7 +2,7 @@
   "ID": "client",
   "Name": "client",
   "Check": {
-    "HTTP": "https://10.0.1.242:8001/client/health",
+    "HTTP": "https://10.0.2.11:8001/client/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -11,6 +11,6 @@
     "ASA"
   ],
   "Port": 8001,
-  "Address": "10.0.1.242"
+  "Address": "10.0.2.11"
 }
 

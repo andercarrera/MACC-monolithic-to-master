@@ -2,7 +2,7 @@
   "ID": "machine2",
   "Name": "machine2",
   "Check": {
-    "HTTP": "https://10.0.1.242:8006/machine2/health",
+    "HTTP": "https://10.0.2.11:8006/machine2/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -11,6 +11,6 @@
     "ASA"
   ],
   "Port": 8006,
-  "Address": "10.0.1.242"
+  "Address": "10.0.2.11"
 }
 
