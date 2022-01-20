@@ -399,8 +399,12 @@ services:
       - '8300'
       - '8301'
       - '8500'
+      - '8501'
       - '8600'
     network_mode: "host"
+    volumes:
+      - ./consul/config:/consul/config
+      - ./consul/certs:/certs/consul
 networks:
   lb7_network:
     driver: bridge

@@ -11,12 +11,12 @@ consul_resolver = dns.resolver.Resolver(configure=False)
 consul_resolver.port = 8600
 consul_resolver.nameservers = [config.CONSUL_IP]
 
-register_service_api_url = "http://{}:8500/v1/agent/service/register".format(Config.CONSUL_IP)
+register_service_api_url = "https://{}:8501/v1/agent/service/register".format(Config.CONSUL_IP)
 
 
 def register_service():
     with open('/app/application/consul.json') as json_file:
-        requests.put(register_service_api_url, json=json.load(json_file))
+        requests.put(register_service_api_url, json=json.load(json_file), verify=False)
         print("Service registered with {}:{}".format(config.IP, config.PORT), flush=True)
 
 

@@ -1,0 +1,18 @@
+{
+  "datacenter": "microservices",
+  "log_level": "info",
+  "ui_config": {
+    "enabled": true,
+    "content_path": ""
+  },
+  "verify_incoming": false,
+  "verify_outgoing": false,
+  "verify_server_hostname": false,
+  "ca_file": "/certs/consul/ca.crt",
+  "cert_file": "/certs/consul/consul.crt",
+  "key_file": "/certs/consul/key.unencrypted.pem",
+  "ports": {
+    "http": 8500,
+    "https": 8501
+  }
+}
