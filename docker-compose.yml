@@ -38,6 +38,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${CLIENT_IP}'
+    restart: unless-stopped
   delivery:
     build: ./flask_app/delivery
     container_name: delivery
@@ -75,8 +76,9 @@ services:
       - consul
     networks:
       lb7_network:
-        ipv4_address: '${DELIVERY_IP}'
-  machine1:
+        ipv4_address: '${DELIVERY_IP}'  
+    restart: unless-stopped
+machine1:
     build: flask_app/machine_1
     container_name: machine_1
     expose:
@@ -114,6 +116,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${MACHINE_1_IP}'
+    restart: unless-stopped
   machine2:
     build: flask_app/machine_2
     container_name: machine_2
@@ -152,6 +155,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${MACHINE_2_IP}'
+    restart: unless-stopped
   machine3:
     build: flask_app/machine_3
     container_name: machine_3
@@ -190,6 +194,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${MACHINE_3_IP}'
+    restart: unless-stopped
   machine4:
     build: flask_app/machine_4
     container_name: machine_4
@@ -228,7 +233,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${MACHINE_4_IP}'
-
+    restart: unless-stopped
   order:
     build: ./flask_app/order
     container_name: order
@@ -267,6 +272,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${ORDER_IP}'
+    restart: unless-stopped
   payment:
     build: ./flask_app/payment
     container_name: payment
@@ -305,6 +311,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${PAYMENT_IP}'
+    restart: unless-stopped
   logs:
     build: ./flask_app/logs
     container_name: logs
@@ -344,6 +351,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${LOGS_IP}'
+    restart: unless-stopped
   warehouse:
     build: ./flask_app/warehouse
     container_name: warehouse
@@ -382,6 +390,7 @@ services:
     networks:
       lb7_network:
         ipv4_address: '${WAREHOUSE_IP}'
+    restart: unless-stopped
     #db:
     #image: mysql
     #restart: always
@@ -407,6 +416,7 @@ services:
     volumes:
       - ./consul/config:/consul/config
       - ./consul/certs:/certs/consul
+    restart: unless-stopped
 networks:
   lb7_network:
     driver: bridge
