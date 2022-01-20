@@ -5,4 +5,4 @@ docker-compose up -d consul
 sleep 10s
 docker-compose up -d client
 sleep 5s
-docker-compose up
+docker-compose up -d
