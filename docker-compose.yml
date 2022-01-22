@@ -33,8 +33,6 @@ services:
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
       FLASK_IP: '${FLASK_IP}'
-    depends_on:
-      - consul
     networks:
       lb7_network:
         ipv4_address: '${CLIENT_IP}'
