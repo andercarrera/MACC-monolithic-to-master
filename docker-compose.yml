@@ -1,44 +1,5 @@
 version: '3.1'
 services:
-  client:
-    build: ./flask_app/client
-    container_name: client
-    expose:
-      - '${CLIENT_PORT}'
-    ports:
-      - '${CLIENT_PORT}:${GUNICORN_PORT}'
-    volumes:
-      - './flask_app/client:/app'
-      - './certs/rabbitmq:/cert_rabbitmq'
-      - './certs/gunicorn:/app/certs'
-    environment:
-      CLIENT_PORT: '${CLIENT_PORT}'
-      GUNICORN_PORT: '${GUNICORN_PORT}'
-      #SQLALCHEMY_DATABASE_URI: 'mysql+mysqlconnector://${MYSQL_USER}:${MYSQL_PASSWORD}@db:${MYSQL_PORT}/${MYSQL_DATABASE}'
-      SQLALCHEMY_DATABASE_URI: '${SQLALCHEMY_SQLITE_DATABASE_URI}'
-      SQLALCHEMY_TRACK_MODIFICATIONS: '${SQLALCHEMY_TRACK_MODIFICATIONS}'
-      CLIENT_IP: '${CLIENT_IP}'
-      DELIVERY_IP: '${DELIVERY_IP}'
-      ORDER_IP: '${ORDER_IP}'
-      PAYMENT_IP: '${PAYMENT_IP}'
-      RABBITMQ_IP: '${RABBITMQ_IP}'
-      RABBITMQ_CA_CERT: "${RABBITMQ_CA_CERT}"
-      RABBITMQ_CLIENT_KEY: "${RABBITMQ_CLIENT_KEY}"
-      RABBITMQ_CLIENT_CERT: "${RABBITMQ_CLIENT_CERT}"
-      CONSUL_IP: "${CONSUL_IP}"
-      SERVICE_NAME: 'client'
-      SERVICE_ID: 'client'
-      CONSUL_HOST: '${CONSUL_IP}'
-      PYTHONBUFFERED: 1
-      PYTHONWARNINGS: ignore:Unverified HTTPS request
-      AWS_DEFAULT_REGION: '${AWS_DEFAULT_REGION}'
-      FLASK_IP: '${FLASK_IP}'
-    depends_on:
-      - consul
-    networks:
-      lb7_network:
-        ipv4_address: '${CLIENT_IP}'
-    restart: unless-stopped
   delivery:
     build: ./flask_app/delivery
     container_name: delivery
