@@ -1,5 +1,5 @@
 {
-  "ID": "client",
+  "ID": "client2",
   "Name": "client",
   "Check": {
     "HTTP": "https://10.0.1.247:8001/client/health",
