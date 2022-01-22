@@ -11,16 +11,26 @@ load_dotenv()
 
 class Config:
     """Set Flask configuration vars from .env file."""
+    client = boto3.client('secretsmanager')
+
     # Database
-    SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI")
+    if environ.get("SQLALCHEMY_DATABASE_URI") is not None:
+        SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI")
+    else:
+        secret = client.get_secret_value(SecretId='Client-DB')
+        db_details = json.loads(secret['SecretString'])
+        SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(db_details['username'],
+                                                                                 db_details['password'],
+                                                                                 db_details['host'],
+                                                                                 db_details['port'],
+                                                                                 db_details['dbname'])
+
     SQLALCHEMY_TRACK_MODIFICATIONS = environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
     # print(SQLALCHEMY_DATABASE_URI)
 
     """ Set RabbitMQ env vars """
 
     RABBITMQ_IP = environ.get("RABBITMQ_IP")
-    client = boto3.client('secretsmanager')
-
     if environ.get("RABBITMQ_USER") is not None:
         RABBITMQ_USER = environ.get("RABBITMQ_USER")
     else:
