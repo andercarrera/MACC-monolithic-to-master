@@ -2,7 +2,7 @@
   "ID": "logs",
   "Name": "logs",
   "Check": {
-    "HTTP": "https://10.0.2.11:8007/logs/health",
+    "HTTP": "https://10.0.1.242:8007/logs/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
@@ -11,6 +11,6 @@
     "ASA"
   ],
   "Port": 8007,
-  "Address": "10.0.2.11"
+  "Address": "10.0.1.242"
 }
 
