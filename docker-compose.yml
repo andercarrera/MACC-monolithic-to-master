@@ -76,9 +76,9 @@ services:
       - consul
     networks:
       lb7_network:
-        ipv4_address: '${DELIVERY_IP}'  
+        ipv4_address: '${DELIVERY_IP}'
     restart: unless-stopped
-machine1:
+  machine1:
     build: flask_app/machine_1
     container_name: machine_1
     expose:
