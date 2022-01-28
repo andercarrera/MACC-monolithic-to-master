@@ -17,7 +17,7 @@ from .mycrypto import RsaSingleton
 
 # Client Routes
 # #########################################################################################################
-@app.route('/client', methods=['POST'])
+@app.route('/client2', methods=['POST'])
 def create_client():
     session = Session()
     new_client = None
@@ -53,7 +53,7 @@ def create_client():
     return response
 
 
-@app.route('/clients', methods=['GET'])
+@app.route('/clients2', methods=['GET'])
 def view_clients():
     session = Session()
 
@@ -66,7 +66,7 @@ def view_clients():
     return response
 
 
-@app.route('/client/<int:client_id>', methods=['GET'])
+@app.route('/client2/<int:client_id>', methods=['GET'])
 def view_client(client_id):
     session = Session()
 
@@ -81,7 +81,7 @@ def view_client(client_id):
     return response
 
 
-@app.route('/client/<client_id>', methods=['PUT'])
+@app.route('/client2/<client_id>', methods=['PUT'])
 def update_client(client_id):
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
@@ -113,7 +113,7 @@ def update_client(client_id):
     return response
 
 
-@app.route('/client/<client_id>', methods=['DELETE'])
+@app.route('/client2/<client_id>', methods=['DELETE'])
 def delete_client(client_id):
     session = Session()
 
@@ -134,7 +134,7 @@ def delete_client(client_id):
 # JWT Routes
 # #########################################################################################################
 
-@app.route('/client/create_jwt', methods=['GET'])
+@app.route('/client2/create_jwt', methods=['GET'])
 def create_jwt():
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
@@ -177,7 +177,7 @@ def create_jwt():
     return response
 
 
-@app.route('/client/refresh_jwt', methods=['GET'])
+@app.route('/client2/refresh_jwt', methods=['GET'])
 def refresh_jwt():
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
@@ -203,7 +203,7 @@ def refresh_jwt():
     return response
 
 
-@app.route('/client/get_public_key', methods=['GET'])
+@app.route('/client2/get_public_key', methods=['GET'])
 def get_public_key():
     content = {'public_key': RsaSingleton.get_public_key().decode()}
     return content
@@ -219,7 +219,7 @@ def get_jwt_from_request():
 
 # Role Routes
 # #########################################################################################################
-@app.route('/client/role', methods=['GET'])
+@app.route('/client2/role', methods=['GET'])
 def view_roles():
     session = Session()
 
@@ -232,7 +232,7 @@ def view_roles():
     return response
 
 
-@app.route('/client/role', methods=['POST'])
+@app.route('/client2/role', methods=['POST'])
 def creat_role():
     session = Session()
     new_role = None
@@ -259,7 +259,7 @@ def creat_role():
     return response
 
 
-@app.route('/client/role/<role_id>', methods=['PUT'])
+@app.route('/client2/role/<role_id>', methods=['PUT'])
 def update_role(role_id):
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
@@ -286,7 +286,7 @@ def update_role(role_id):
     return response
 
 
-@app.route('/client/role/<role_id>', methods=['DELETE'])
+@app.route('/client2/role/<role_id>', methods=['DELETE'])
 def delete_role(role_id):
     session = Session()
 
@@ -305,7 +305,7 @@ def delete_role(role_id):
 
 
 # Health Check #######################################################################################################
-@app.route('/client/health', methods=['HEAD', 'GET'])
+@app.route('/client2/health', methods=['HEAD', 'GET'])
 @app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()
