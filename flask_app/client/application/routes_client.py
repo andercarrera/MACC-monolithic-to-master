@@ -1,9 +1,6 @@
-import datetime
-import secrets
 import traceback
 
 import bcrypt
-import jwt
 from flask import current_app as app
 from flask import request, jsonify, abort
 from sqlalchemy.orm.exc import NoResultFound
@@ -11,13 +8,13 @@ from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, Unsup
     ServiceUnavailable
 
 from . import Session, log
-from .model_client import Client, Role, client_role_table
-from .mycrypto import RsaSingleton
+from .auth import RsaSingleton
+from .model_client import Client, Role
 
 
 # Client Routes
 # #########################################################################################################
-@app.route('/client2', methods=['POST'])
+@app.route('/client', methods=['POST'])
 def create_client():
     session = Session()
     new_client = None
@@ -53,7 +50,7 @@ def create_client():
     return response
 
 
-@app.route('/clients2', methods=['GET'])
+@app.route('/clients', methods=['GET'])
 def view_clients():
     session = Session()
 
@@ -66,7 +63,7 @@ def view_clients():
     return response
 
 
-@app.route('/client2/<int:client_id>', methods=['GET'])
+@app.route('/client/<int:client_id>', methods=['GET'])
 def view_client(client_id):
     session = Session()
 
@@ -81,7 +78,7 @@ def view_client(client_id):
     return response
 
 
-@app.route('/client2/<client_id>', methods=['PUT'])
+@app.route('/client/<client_id>', methods=['PUT'])
 def update_client(client_id):
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
@@ -113,7 +110,7 @@ def update_client(client_id):
     return response
 
 
-@app.route('/client2/<client_id>', methods=['DELETE'])
+@app.route('/client/<client_id>', methods=['DELETE'])
 def delete_client(client_id):
     session = Session()
 
@@ -131,84 +128,6 @@ def delete_client(client_id):
     return response
 
 
-# JWT Routes
-# #########################################################################################################
-
-@app.route('/client2/create_jwt', methods=['GET'])
-def create_jwt():
-    session = Session()
-    if request.headers['Content-Type'] != 'application/json':
-        abort(UnsupportedMediaType.code)
-    auth = request.authorization
-    response = None
-    try:
-        roles = session.query(client_role_table).filter_by(client_id=auth['username']).all()
-        user = session.query(Client).filter(Client.id == auth['username']).one()
-
-        if not bcrypt.checkpw(auth['password'].encode('utf-8'), user.password.encode('utf-8')):
-            raise Exception
-        payload = {
-            'sub': user.id,
-            'roles': roles,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-        }
-        refresh_token = secrets.token_urlsafe(32)
-
-        response = {
-            'jwt_token': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256'),
-            'refresh_token': refresh_token
-        }
-
-        user.refresh_token = refresh_token
-        session.commit()
-    except NoResultFound:
-        abort(NotFound.code, "Given user id not found in the Database")
-    except KeyError as e:
-        log.create_log(e, 'error')
-        session.rollback()
-        session.close()
-        abort(BadRequest.code)
-    except Exception:
-        session.rollback()
-        session.close()
-        abort(Unauthorized.code, "Invalid password")
-
-    session.close()
-    return response
-
-
-@app.route('/client2/refresh_jwt', methods=['GET'])
-def refresh_jwt():
-    session = Session()
-    if request.headers['Content-Type'] != 'application/json':
-        abort(UnsupportedMediaType.code)
-    response = None
-    try:
-        refresh_token = get_jwt_from_request()
-        user = session.query(Client).filter(Client.refresh_token == refresh_token).one()
-        roles = session.query(client_role_table).filter_by(client_id=user.id).all()
-
-        payload = {
-            'sub': user.id,
-            'roles': roles,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-        }
-        response = {
-            'jwt_token': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256'),
-        }
-    except NoResultFound:
-        abort(NotFound.code, "No user found with the given refresh token")
-
-    session.close()
-    return response
-
-
-@app.route('/client2/get_public_key', methods=['GET'])
-def get_public_key():
-    content = {'public_key': RsaSingleton.get_public_key().decode()}
-    return content
-
-
 def get_jwt_from_request():
     auth = request.headers.get('Authorization')
     if auth is None:
@@ -219,7 +138,7 @@ def get_jwt_from_request():
 
 # Role Routes
 # #########################################################################################################
-@app.route('/client2/role', methods=['GET'])
+@app.route('/client/role', methods=['GET'])
 def view_roles():
     session = Session()
 
@@ -232,7 +151,7 @@ def view_roles():
     return response
 
 
-@app.route('/client2/role', methods=['POST'])
+@app.route('/client/role', methods=['POST'])
 def creat_role():
     session = Session()
     new_role = None
@@ -259,7 +178,7 @@ def creat_role():
     return response
 
 
-@app.route('/client2/role/<role_id>', methods=['PUT'])
+@app.route('/client/role/<role_id>', methods=['PUT'])
 def update_role(role_id):
     session = Session()
     if request.headers['Content-Type'] != 'application/json':
@@ -286,7 +205,7 @@ def update_role(role_id):
     return response
 
 
-@app.route('/client2/role/<role_id>', methods=['DELETE'])
+@app.route('/client/role/<role_id>', methods=['DELETE'])
 def delete_role(role_id):
     session = Session()
 
@@ -305,7 +224,7 @@ def delete_role(role_id):
 
 
 # Health Check #######################################################################################################
-@app.route('/client2/health', methods=['HEAD', 'GET'])
+@app.route('/client/health', methods=['HEAD', 'GET'])
 @app.route('/health', methods=['HEAD', 'GET'])
 def health_check():
     public_key = RsaSingleton.get_public_key()
