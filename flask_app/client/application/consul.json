@@ -1,8 +1,8 @@
 {
   "ID": "client2",
-  "Name": "client",
+  "Name": "client2",
   "Check": {
-    "HTTP": "https://10.0.2.13:8001/client/health",
+    "HTTP": "https://10.0.2.13:8001/client2/health",
     "TLSSkipVerify": true,
     "Interval": "10s",
     "Timeout": "1s"
