@@ -168,7 +168,8 @@ def create_jwt():
         session.rollback()
         session.close()
         abort(BadRequest.code)
-    except Exception:
+    except Exception as e:
+        print(e, flush=True)
         session.rollback()
         session.close()
         abort(Unauthorized.code, "Invalid password")
