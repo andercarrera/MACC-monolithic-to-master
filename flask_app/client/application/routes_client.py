@@ -312,7 +312,7 @@ def health_check():
     if not public_key:
         abort(ServiceUnavailable.code)
 
-    return 'OK', 200
+    return 'Client 1 OK', 200
 
 
 # Error Handling #######################################################################################################
