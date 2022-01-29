@@ -9,7 +9,7 @@ ThreadedConsumer('sagas_commands', 'delivery.create', ThreadedConsumer.create_de
 ThreadedConsumer('sagas_commands', 'delivery.remove', ThreadedConsumer.remove_delivery)
 ThreadedConsumer('event_exchange', 'delivery.delivered', ThreadedConsumer.delivery_delivered)
 ThreadedConsumer('sagas_commands', 'delivery.cancel', ThreadedConsumer.cancel_delivery)
-ThreadedConsumer('event_exchange', 'delivery.ready', ThreadedConsumer.delivery_ready)
+ThreadedConsumer('event_exchange', 'warehouse.delivery_ready', ThreadedConsumer.delivery_ready)
 
 
 # request jwt public key

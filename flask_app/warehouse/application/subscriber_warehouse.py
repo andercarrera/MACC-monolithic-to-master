@@ -107,14 +107,14 @@ class ThreadedConsumer:
 
             if pieces_left_to_produce_A > 0:
                 for i in range(pieces_left_to_produce_A):
-                    publish_round_robin_msg("event_exchange", "machine.produce_piece_A", str(content['order_id']),
+                    publish_round_robin_msg("event_exchange", "warehouse.need_piece_A", str(content['order_id']),
                                             'piece_A')
             else:
                 ThreadedConsumer.order_ready(order, order_id, session)
 
             if pieces_left_to_produce_B > 0:
                 for i in range(pieces_left_to_produce_B):
-                    publish_round_robin_msg("event_exchange", "machine.produce_piece_B", str(content['order_id']),
+                    publish_round_robin_msg("event_exchange", "warehouse.need_piece_B", str(content['order_id']),
                                             'piece_B')
             else:
                 ThreadedConsumer.order_ready(order, order_id, session)
@@ -127,8 +127,8 @@ class ThreadedConsumer:
     @staticmethod
     def order_ready(order, order_id, session):
         order.status = order.STATUS_ACCEPTED
-        publish_msg("event_exchange", "order.accepted", str(order_id))
-        publish_msg("event_exchange", "delivery.ready", str(order_id))
+        publish_msg("event_exchange", "warehouse.order_accepted", str(order_id))
+        publish_msg("event_exchange", "warehouse.delivery_ready", str(order_id))
         session.commit()
         session.flush()
 
@@ -251,11 +251,11 @@ class ThreadedConsumer:
             number_of_pieces_B = content['number_of_pieces_B']
 
             for i in range(number_of_pieces_A):
-                publish_round_robin_msg("event_exchange", "machine.produce_piece_A", '',
+                publish_round_robin_msg("event_exchange", "warehouse.need_piece_A", '',
                                         'piece_A')
 
             for i in range(number_of_pieces_B):
-                publish_round_robin_msg("event_exchange", "machine.produce_piece_B", '',
+                publish_round_robin_msg("event_exchange", "warehouse.need_piece_B", '',
                                         'piece_B')
         except KeyError as e:
             log.create_log(e, 'error')
