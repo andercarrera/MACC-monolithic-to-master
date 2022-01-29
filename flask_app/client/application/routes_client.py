@@ -1,6 +1,9 @@
+import datetime
+import secrets
 import traceback
 
 import bcrypt
+import jwt
 from flask import current_app as app
 from flask import request, jsonify, abort
 from sqlalchemy.orm.exc import NoResultFound
@@ -8,8 +11,8 @@ from werkzeug.exceptions import NotFound, InternalServerError, BadRequest, Unsup
     ServiceUnavailable
 
 from . import Session, log
-from .auth import RsaSingleton
-from .model_client import Client, Role
+from .model_client import Client, Role, client_role_table
+from .mycrypto import RsaSingleton
 
 
 # Client Routes
@@ -126,6 +129,85 @@ def delete_client(client_id):
     response = jsonify(client.as_dict())
     session.close()
     return response
+
+
+# JWT Routes
+# #########################################################################################################
+
+@app.route('/client/create_jwt', methods=['GET'])
+def create_jwt():
+    session = Session()
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    auth = request.authorization
+    response = None
+    try:
+        roles = session.query(client_role_table).filter_by(client_id=auth['username']).all()
+        user = session.query(Client).filter(Client.id == auth['username']).one()
+
+        if not bcrypt.checkpw(auth['password'].encode('utf-8'), user.password.encode('utf-8')):
+            raise Exception
+        payload = {
+            'sub': user.id,
+            'roles': roles,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }
+        refresh_token = secrets.token_urlsafe(32)
+
+        response = {
+            'jwt_token': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256'),
+            'refresh_token': refresh_token
+        }
+
+        user.refresh_token = refresh_token
+        session.commit()
+    except NoResultFound:
+        abort(NotFound.code, "Given user id not found in the Database")
+    except KeyError as e:
+        log.create_log(e, 'error')
+        session.rollback()
+        session.close()
+        abort(BadRequest.code)
+    except Exception as e:
+        print(e, flush=True)
+        session.rollback()
+        session.close()
+        abort(Unauthorized.code, "Invalid password")
+
+    session.close()
+    return response
+
+
+@app.route('/client/refresh_jwt', methods=['GET'])
+def refresh_jwt():
+    session = Session()
+    if request.headers['Content-Type'] != 'application/json':
+        abort(UnsupportedMediaType.code)
+    response = None
+    try:
+        refresh_token = get_jwt_from_request()
+        user = session.query(Client).filter(Client.refresh_token == refresh_token).one()
+        roles = session.query(client_role_table).filter_by(client_id=user.id).all()
+
+        payload = {
+            'sub': user.id,
+            'roles': roles,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }
+        response = {
+            'jwt_token': jwt.encode(payload, RsaSingleton.get_private_key(), algorithm='RS256'),
+        }
+    except NoResultFound:
+        abort(NotFound.code, "No user found with the given refresh token")
+
+    session.close()
+    return response
+
+
+@app.route('/client/get_public_key', methods=['GET'])
+def get_public_key():
+    content = {'public_key': RsaSingleton.get_public_key().decode()}
+    return content
 
 
 def get_jwt_from_request():
