@@ -5,10 +5,10 @@ from Crypto.PublicKey import RSA
 from jwt import InvalidSignatureError
 from werkzeug.exceptions import Forbidden, abort, Unauthorized
 
-with open('private_key.pem', 'rb') as private_file:
+with open('.private_key.pem', 'rb') as private_file:
     private_key = RSA.importKey(private_file.read(), 'group3').exportKey()
 
-with open('public_key.pem', 'rb') as public_file:
+with open('.public_key.pem', 'rb') as public_file:
     public_key = RSA.importKey(public_file.read()).exportKey()
 
 
