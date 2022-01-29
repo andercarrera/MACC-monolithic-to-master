@@ -1,20 +1,15 @@
 from datetime import datetime
 
-import boto3
 import jwt
+from Crypto.PublicKey import RSA
 from jwt import InvalidSignatureError
 from werkzeug.exceptions import Forbidden, abort, Unauthorized
 
-client = boto3.client('secretsmanager')
-jwt_public = client.get_secret_value(SecretId='jwt_public_key')
-jwt_public_key = jwt_public['SecretString']
+with open('private_key.pem', 'rb') as private_file:
+    private_key = RSA.importKey(private_file.read(), 'group3').exportKey()
 
-jwt_private = client.get_secret_value(SecretId='jwt_private_key')
-jwt_private_key = jwt_public['SecretString']
-# key = RSA.generate(2048)
-
-private_key = jwt_private_key.encode()
-public_key = jwt_public_key.encode()
+with open('public_key.pem', 'rb') as public_file:
+    public_key = RSA.importKey(public_file.read()).exportKey()
 
 
 class RsaSingleton(object):
