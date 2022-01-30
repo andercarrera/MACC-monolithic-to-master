@@ -1,24 +1,4 @@
-# HOW TO TEST THE APPLICATION CORRECTLY
-1. Check JWT:
-   1. JWT Signature failed (request with invalid token)
-   2. Get token: bad password and bad user_id error management
-   3. Create a user with unexistent role 
-   4. Create a role !='admin'
-   5. Create a user 
-   6. Try to create a user with the token of the user created (Invalid rights)
-   7. Get public Key without auth.
-   8. After 30 mins you can test that the token has expired
-2. Roles:
-    2.1 CRUD
-3. User:
-    3.1 CRUD
-4. Payment: CREATE 1 euro
-5. Order create: Verify without money
-6. Payment: CREATE 500 euros
-7. Order: Create order
-8. In the meantime check /pieces endpoint is not available because it has not been exposed in HAProxy
-9. Confirm delivery address
-10. Check logs
+# MACC - POPBL 1: Microservices based manufacturing application
 
 * If you are using **Wingows** and have **Vagrant** installed with **Docker** and **Docker-Compose**, you can follow **Running Monolithic application using vagrant and docker-compose**.
 
