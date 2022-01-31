@@ -147,6 +147,8 @@ def delete_order(order_id):
         order = session.query(Order).get(order_id)
         if not order:
             abort(NotFound.code, "Order not found for given order id")
+        elif order.status == Order.STATUS_PREPARING:
+            abort(BadRequest.code, "Order is still preparing, can't be cancelled")
         elif order.status == Order.STATUS_CANCELLED:
             abort(BadRequest.code, "Order already cancelled")
         elif order.status == Order.STATUS_DELIVERED:
